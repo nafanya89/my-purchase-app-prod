@@ -250,6 +250,9 @@ export const NeedsPage = ({
                                         <tr>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Замовлено</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Назва</th>
+                                            {groupedRequests[req.id] && (
+                                                <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Магазин</th>
+                                            )}
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">К-сть</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: hiddenColumns.pricePerUnit ? '40px' : '150px', transition: 'width 500ms ease-in-out' }}>
                                                 <div className="flex items-center gap-1">
@@ -344,6 +347,11 @@ export const NeedsPage = ({
                                                         </a>
                                                     ) : (item.name)}
                                                 </td>
+                                                {groupedRequests[req.id] && (
+                                                    <td className={`px-4 py-2 ${item.color || 'text-gray-500'}`}>
+                                                        {getBaseUrl(item.link) || '-'}
+                                                    </td>
+                                                )}
                                                 <td className="px-4 py-2">{item.quantity}</td>
                                                 <td className="px-4 py-2" style={{ width: hiddenColumns.pricePerUnit ? '0' : '150px', transition: 'width 500ms ease-in-out', overflow: 'hidden' }}>
                                                     {(!hiddenColumns.pricePerUnit && (item.pricePerUnit?.toFixed(2) || '0.00'))}
