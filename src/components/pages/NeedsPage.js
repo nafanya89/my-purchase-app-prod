@@ -37,6 +37,28 @@ const getBaseUrl = (url) => {
     return baseDomain || null;
 };
 
+const generateItemCode = (allRequests, currentRequestId, itemIndex) => {
+    let maxCode = 0;
+
+    // Шукаємо максимальний код серед всіх товарів у всіх списках
+    allRequests.forEach(req => {
+        req.items.forEach(item => {
+            if (item.code) {
+                const code = parseInt(item.code);
+                if (!isNaN(code) && code > maxCode) {
+                    maxCode = code;
+                }
+            }
+        });
+    });
+
+    // Якщо це новий товар (без коду), генеруємо наступний код
+    const nextCode = maxCode + 1;
+    
+    // Форматуємо код до 5 цифр з ведучими нулями
+    return nextCode.toString().padStart(5, '0');
+};
+
 const PURCHASE_STATUSES = {
     NOT_PURCHASED: 'не куплено',
     WAITING_INVOICE: 'очікування рахунок',
@@ -62,6 +84,7 @@ export const NeedsPage = ({
     const [activeTab, setActiveTab] = useState('нове');
     const [groupedRequests, setGroupedRequests] = useState({});
     const [hiddenColumns, setHiddenColumns] = useState({
+        code: false,
         pricePerUnit: false,
         comment: false,
         receipt: false,
@@ -271,6 +294,20 @@ export const NeedsPage = ({
                                     <thead className="bg-gray-50 dark:bg-slate-700">
                                         <tr>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Замовлено</th>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: hiddenColumns.code ? '40px' : '100px', transition: 'width 500ms ease-in-out' }}>
+                                                <div className="flex items-center gap-1">
+                                                    <div className="overflow-hidden transition-all duration-500 ease-in-out" style={{ maxWidth: hiddenColumns.code ? '0' : '60px', opacity: hiddenColumns.code ? 0 : 1 }}>
+                                                        <span className="whitespace-nowrap">Шифр</span>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => toggleColumn('code')} 
+                                                        className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors shrink-0"
+                                                        title={hiddenColumns.code ? "Показати шифри" : "Приховати шифри"}
+                                                    >
+                                                        {hiddenColumns.code ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
+                                                    </button>
+                                                </div>
+                                            </th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Назва</th>
                                             {groupedRequests[req.id] && (
                                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Магазин</th>
@@ -356,6 +393,9 @@ export const NeedsPage = ({
                                                     <button onClick={() => handleToggleItemOrdered(req.id, item.originalIndex, !item.ordered)}>
                                                         {item.ordered ? <CheckSquare className="text-green-500" /> : <Square className="text-slate-400" />}
                                                     </button>
+                                                </td>
+                                                <td className="px-4 py-2 font-mono" style={{ width: hiddenColumns.code ? '0' : '100px', transition: 'width 500ms ease-in-out', overflow: 'hidden' }}>
+                                                    {!hiddenColumns.code && (item.code || generateItemCode(purchaseRequests, req.id, item.originalIndex))}
                                                 </td>
                                                 <td className="px-4 py-2 font-medium">
                                                     {item.link ? (
