@@ -44,45 +44,28 @@ const generateItemCode = (allRequests, currentRequestId, itemIndex) => {
         return currentRequest.items[itemIndex].code;
     }
 
-    // Знаходимо максимальний код серед всіх товарів
-    let maxCode = 0;
-    allRequests.forEach(req => {
-        req.items.forEach(item => {
-            if (item.code) {
-                const code = parseInt(item.code);
-                if (!isNaN(code) && code > maxCode) {
-                    maxCode = code;
-                }
-            }
-        });
-    });
+    // Сортуємо списки за часом створення
+    const sortedRequests = [...allRequests].sort((a, b) => 
+        a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
+    );
 
-    // Рахуємо кількість товарів без коду до поточного
-    let itemsBeforeCurrent = 0;
+    // Рахуємо позицію поточного товару серед всіх товарів
+    let totalIndex = 0;
     let foundCurrent = false;
 
-    allRequests.forEach(req => {
-        if (foundCurrent) return;
-        
-        req.items.forEach((item, idx) => {
-            if (foundCurrent) return;
-            
+    for (const req of sortedRequests) {
+        for (let idx = 0; idx < req.items.length; idx++) {
             if (req.id === currentRequestId && idx === itemIndex) {
                 foundCurrent = true;
-                return;
+                break;
             }
-            
-            if (!item.code) {
-                itemsBeforeCurrent++;
-            }
-        });
-    });
+            totalIndex++;
+        }
+        if (foundCurrent) break;
+    }
 
-    // Генеруємо наступний код
-    const nextCode = maxCode + itemsBeforeCurrent + 1;
-    
-    // Форматуємо код до 5 цифр з ведучими нулями
-    return nextCode.toString().padStart(5, '0');
+    // Генеруємо код на основі позиції
+    return (totalIndex + 1).toString().padStart(5, '0');
 };
 
 const PURCHASE_STATUSES = {
@@ -108,45 +91,53 @@ export const NeedsPage = ({
     handleItemUpdate 
 }) => {
     // Ефект для міграції кодів
+    const [isMigrating, setIsMigrating] = useState(false);
+
     React.useEffect(() => {
         const migrateItemCodes = async () => {
-            // Проходимо по всіх списках в порядку створення
-            const sortedRequests = [...purchaseRequests].sort((a, b) => 
-                a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
-            );
+            if (isMigrating) return;
+            setIsMigrating(true);
 
-            // Знаходимо максимальний існуючий код
-            let maxCode = 0;
-            sortedRequests.forEach(req => {
-                req.items.forEach(item => {
-                    if (item.code) {
-                        const code = parseInt(item.code);
-                        if (!isNaN(code) && code > maxCode) {
-                            maxCode = code;
-                        }
-                    }
-                });
-            });
+            try {
+                // Проходимо по всіх списках в порядку створення
+                const sortedRequests = [...purchaseRequests].sort((a, b) => 
+                    a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
+                );
 
-            // Збираємо всі товари без кодів з їх позиціями
-            const itemsToUpdate = [];
-            sortedRequests.forEach(req => {
-                req.items.forEach((item, index) => {
-                    if (!item.code) {
-                        itemsToUpdate.push({
+                // Збираємо всі товари (з кодами і без) в порядку створення
+                const allItems = [];
+                sortedRequests.forEach(req => {
+                    req.items.forEach((item, index) => {
+                        allItems.push({
                             requestId: req.id,
                             itemIndex: index,
-                            item
+                            item,
+                            hasCode: Boolean(item.code)
+                        });
+                    });
+                });
+
+                // Призначаємо або перепризначаємо коди всім товарам
+                const updates = [];
+                allItems.forEach((item, index) => {
+                    const newCode = (index + 1).toString().padStart(5, '0');
+                    if (!item.hasCode || item.item.code !== newCode) {
+                        updates.push({
+                            requestId: item.requestId,
+                            itemIndex: item.itemIndex,
+                            code: newCode
                         });
                     }
                 });
-            });
 
-            // Призначаємо нові коди
-            for (const item of itemsToUpdate) {
-                maxCode++;
-                const newCode = maxCode.toString().padStart(5, '0');
-                await handleItemUpdate(item.requestId, item.itemIndex, 'code', newCode);
+                // Застосовуємо всі оновлення одночасно
+                await Promise.all(
+                    updates.map(update => 
+                        handleItemUpdate(update.requestId, update.itemIndex, 'code', update.code)
+                    )
+                );
+            } finally {
+                setIsMigrating(false);
             }
         };
 
@@ -155,10 +146,10 @@ export const NeedsPage = ({
             req.items.some(item => !item.code)
         );
 
-        if (needsMigration) {
+        if (needsMigration && !isMigrating) {
             migrateItemCodes();
         }
-    }, [purchaseRequests, handleItemUpdate]);
+    }, [purchaseRequests, handleItemUpdate, isMigrating]);
     const [activeTab, setActiveTab] = useState('нове');
     const [groupedRequests, setGroupedRequests] = useState({});
     const [hiddenColumns, setHiddenColumns] = useState({
