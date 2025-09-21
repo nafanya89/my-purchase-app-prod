@@ -49,23 +49,25 @@ const generateItemCode = (allRequests, currentRequestId, itemIndex) => {
         a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
     );
 
-    // Рахуємо позицію поточного товару серед всіх товарів
-    let totalIndex = 0;
-    let foundCurrent = false;
+    // Збираємо всі товари в порядку
+    const allItems = [];
+    sortedRequests.forEach(req => {
+        req.items.forEach((item, idx) => {
+            allItems.push({
+                requestId: req.id,
+                itemIndex: idx,
+                item
+            });
+        });
+    });
 
-    for (const req of sortedRequests) {
-        for (let idx = 0; idx < req.items.length; idx++) {
-            if (req.id === currentRequestId && idx === itemIndex) {
-                foundCurrent = true;
-                break;
-            }
-            totalIndex++;
-        }
-        if (foundCurrent) break;
-    }
+    // Знаходимо індекс поточного товару
+    const currentItemIndex = allItems.findIndex(
+        item => item.requestId === currentRequestId && item.itemIndex === itemIndex
+    );
 
     // Генеруємо код на основі позиції
-    return (totalIndex + 1).toString().padStart(5, '0');
+    return (currentItemIndex + 1).toString().padStart(5, '0');
 };
 
 const PURCHASE_STATUSES = {
@@ -111,37 +113,38 @@ export const NeedsPage = ({
                         allItems.push({
                             requestId: req.id,
                             itemIndex: index,
-                            item,
-                            hasCode: Boolean(item.code)
+                            item
                         });
                     });
                 });
 
-                // Призначаємо або перепризначаємо коди всім товарам
+                // Призначаємо коди всім товарам
                 const updates = [];
-                allItems.forEach((item, index) => {
-                    const newCode = (index + 1).toString().padStart(5, '0');
-                    if (!item.hasCode || item.item.code !== newCode) {
+                for (let i = 0; i < allItems.length; i++) {
+                    const item = allItems[i];
+                    const newCode = (i + 1).toString().padStart(5, '0');
+                    
+                    // Оновлюємо тільки якщо код змінився або його немає
+                    if (!item.item.code || item.item.code !== newCode) {
                         updates.push({
                             requestId: item.requestId,
                             itemIndex: item.itemIndex,
                             code: newCode
                         });
                     }
-                });
+                }
 
-                // Застосовуємо всі оновлення одночасно
-                await Promise.all(
-                    updates.map(update => 
-                        handleItemUpdate(update.requestId, update.itemIndex, 'code', update.code)
-                    )
-                );
+                // Застосовуємо оновлення послідовно
+                for (const update of updates) {
+                    await handleItemUpdate(update.requestId, update.itemIndex, 'code', update.code);
+                    // Чекаємо трохи між оновленнями
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
             } finally {
                 setIsMigrating(false);
             }
         };
 
-        // Перевіряємо, чи є товари без кодів
         const needsMigration = purchaseRequests.some(req => 
             req.items.some(item => !item.code)
         );
