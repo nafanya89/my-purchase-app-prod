@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Copy, CheckSquare, Square, Trash2, ChevronLeft, ChevronRight, MessageCircle, Group } from 'lucide-react';
 import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../config/firebase';
+import { db, firebaseConfig } from '../../config/firebase';
 
 const SITE_COLORS = [
     'text-purple-700 dark:text-purple-400',
@@ -74,15 +74,20 @@ export const NeedsPage = ({
             setIsMigrating(true);
 
             try {
+                console.log('Starting migration...');
+                console.log('Total requests:', purchaseRequests.length);
+
                 // Сортуємо списки за часом створення
                 const sortedRequests = [...purchaseRequests].sort((a, b) => 
                     a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
                 );
 
                 let counter = 1;
+                let totalUpdated = 0;
 
                 // Проходимо по всіх списках в порядку створення
                 for (const request of sortedRequests) {
+                    console.log(`Processing request ${request.id}...`);
                     let hasChanges = false;
                     const updatedItems = [...request.items];
 
@@ -90,6 +95,7 @@ export const NeedsPage = ({
                     for (let i = 0; i < updatedItems.length; i++) {
                         const newCode = counter.toString().padStart(5, '0');
                         if (updatedItems[i].code !== newCode) {
+                            console.log(`Updating item ${i} code from ${updatedItems[i].code} to ${newCode}`);
                             updatedItems[i] = {
                                 ...updatedItems[i],
                                 code: newCode
@@ -102,15 +108,24 @@ export const NeedsPage = ({
                     // Оновлюємо список в Firebase, якщо були зміни
                     if (hasChanges) {
                         try {
-                            const requestRef = doc(db, 'purchaseRequests', request.id);
+                            console.log(`Saving changes for request ${request.id}...`);
+                            const requestRef = doc(db, `/artifacts/${firebaseConfig.projectId}/public/data/purchaseRequests`, request.id);
                             await updateDoc(requestRef, { items: updatedItems });
+                            totalUpdated++;
+                            console.log(`Changes saved for request ${request.id}`);
                             // Чекаємо трохи між оновленнями
                             await new Promise(resolve => setTimeout(resolve, 500));
                         } catch (error) {
                             console.error('Error updating request:', error);
+                            console.error(error);
                         }
+                    } else {
+                        console.log(`No changes needed for request ${request.id}`);
                     }
                 }
+
+                console.log('Migration completed!');
+                console.log('Total requests updated:', totalUpdated);
             } finally {
                 setIsMigrating(false);
             }
