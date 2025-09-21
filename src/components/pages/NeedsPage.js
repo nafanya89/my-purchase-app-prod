@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PlusCircle, Copy, CheckSquare, Square, Trash2, ChevronLeft, ChevronRight, MessageCircle, Group } from 'lucide-react';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../config/firebase';
 
 const SITE_COLORS = [
     'text-purple-700 dark:text-purple-400',
@@ -37,9 +39,8 @@ const getBaseUrl = (url) => {
     return baseDomain || null;
 };
 
-const getItemCode = (requestId, itemIndex, itemCodes) => {
-    const codeKey = `${requestId}-${itemIndex}`;
-    return itemCodes[codeKey] || '00000';
+const getItemCode = (item) => {
+    return item.code || '00000';
 };
 
 const PURCHASE_STATUSES = {
@@ -65,32 +66,65 @@ export const NeedsPage = ({
     handleItemUpdate 
 }) => {
     // Ефект для міграції кодів
-    const [itemCodes, setItemCodes] = useState({});
+    const [isMigrating, setIsMigrating] = useState(false);
 
-    // Ініціалізуємо коди при першому рендері або зміні списків
-    React.useEffect(() => {
-        // Сортуємо списки за часом створення
-        const sortedRequests = [...purchaseRequests].sort((a, b) => 
-            a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
+    useEffect(() => {
+        const migrateItemCodes = async () => {
+            if (isMigrating) return;
+            setIsMigrating(true);
+
+            try {
+                // Сортуємо списки за часом створення
+                const sortedRequests = [...purchaseRequests].sort((a, b) => 
+                    a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
+                );
+
+                let counter = 1;
+
+                // Проходимо по всіх списках в порядку створення
+                for (const request of sortedRequests) {
+                    let hasChanges = false;
+                    const updatedItems = [...request.items];
+
+                    // Проходимо по всіх товарах в списку
+                    for (let i = 0; i < updatedItems.length; i++) {
+                        const newCode = counter.toString().padStart(5, '0');
+                        if (updatedItems[i].code !== newCode) {
+                            updatedItems[i] = {
+                                ...updatedItems[i],
+                                code: newCode
+                            };
+                            hasChanges = true;
+                        }
+                        counter++;
+                    }
+
+                    // Оновлюємо список в Firebase, якщо були зміни
+                    if (hasChanges) {
+                        try {
+                            const requestRef = doc(db, 'purchaseRequests', request.id);
+                            await updateDoc(requestRef, { items: updatedItems });
+                            // Чекаємо трохи між оновленнями
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                        } catch (error) {
+                            console.error('Error updating request:', error);
+                        }
+                    }
+                }
+            } finally {
+                setIsMigrating(false);
+            }
+        };
+
+        // Перевіряємо, чи потрібна міграція
+        const needsMigration = purchaseRequests.some(req => 
+            req.items.some(item => !item.code)
         );
 
-        // Збираємо всі товари в порядку
-        let counter = 1;
-        const newCodes = {};
-
-        // Проходимо по всіх списках в порядку створення
-        sortedRequests.forEach(request => {
-            // Проходимо по всіх товарах в списку
-            request.items.forEach((_, index) => {
-                const key = `${request.id}-${index}`;
-                newCodes[key] = counter.toString().padStart(5, '0');
-                counter++;
-            });
-        });
-
-        // Оновлюємо локальний стан
-        setItemCodes(newCodes);
-    }, [purchaseRequests]); // Залежність тільки від списків
+        if (needsMigration && !isMigrating) {
+            migrateItemCodes();
+        }
+    }, [purchaseRequests, isMigrating]);
     const [activeTab, setActiveTab] = useState('нове');
     const [groupedRequests, setGroupedRequests] = useState({});
     const [hiddenColumns, setHiddenColumns] = useState({
@@ -405,7 +439,7 @@ export const NeedsPage = ({
                                                     </button>
                                                 </td>
                                                 <td className="px-4 py-2 font-mono" style={{ width: hiddenColumns.code ? '0' : '100px', transition: 'width 500ms ease-in-out', overflow: 'hidden' }}>
-                                                    {!hiddenColumns.code && getItemCode(req.id, item.originalIndex, itemCodes)}
+                                                    {!hiddenColumns.code && getItemCode(item)}
                                                 </td>
                                                 <td className="px-4 py-2 font-medium">
                                                     {item.link ? (

@@ -1,0 +1,13 @@
+[debug] [2025-09-21T16:25:12.490Z] ----------------------------------------------------------------------
+[debug] [2025-09-21T16:25:12.491Z] Command:       /usr/local/bin/node /usr/local/bin/firebase deploy
+[debug] [2025-09-21T16:25:12.491Z] CLI Version:   9.23.3
+[debug] [2025-09-21T16:25:12.491Z] Platform:      darwin
+[debug] [2025-09-21T16:25:12.491Z] Node Version:  v14.17.3
+[debug] [2025-09-21T16:25:12.494Z] Time:          Sun Sep 21 2025 19:25:12 GMT+0300 (Eastern European Summer Time)
+[debug] [2025-09-21T16:25:12.494Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-09-21T16:25:12.537Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-09-21T16:25:12.537Z] > authorizing via signed-in user (vasylbodnaruk@gmail.com)
+[debug] [2025-09-21T16:25:12.537Z] [iam] checking project my-purchase-manager-c2183 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2025-09-21T16:25:12.538Z] >>> HTTP REQUEST POST https://cloudresourcemanager.googleapis.com/v1/projects/my-purchase-manager-c2183:testIamPermissions  
+ {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}

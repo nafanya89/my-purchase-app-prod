@@ -1,0 +1,16 @@
+[debug] [2025-09-21T09:41:19.399Z] ----------------------------------------------------------------------
+[debug] [2025-09-21T09:41:19.400Z] Command:       /opt/homebrew/Cellar/node/23.7.0/bin/node /opt/homebrew/bin/firebase deploy
+[debug] [2025-09-21T09:41:19.401Z] CLI Version:   14.17.0
+[debug] [2025-09-21T09:41:19.401Z] Platform:      darwin
+[debug] [2025-09-21T09:41:19.401Z] Node Version:  v23.7.0
+[debug] [2025-09-21T09:41:19.401Z] Time:          Sun Sep 21 2025 12:41:19 GMT+0300 (Eastern European Summer Time)
+[debug] [2025-09-21T09:41:19.401Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2025-09-21T09:41:19.475Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2025-09-21T09:41:19.475Z] > authorizing via signed-in user (vasylbodnaruk@gmail.com)
+[debug] [2025-09-21T09:41:19.476Z] [iam] checking project my-purchase-manager-c2183 for permissions ["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]
+[debug] [2025-09-21T09:41:19.476Z] Checked if tokens are valid: true, expires at: 1758451127643
+[debug] [2025-09-21T09:41:19.476Z] Checked if tokens are valid: true, expires at: 1758451127643
+[debug] [2025-09-21T09:41:19.476Z] >>> [apiv2][query] POST https://cloudresourcemanager.googleapis.com/v1/projects/my-purchase-manager-c2183:testIamPermissions [none]
+[debug] [2025-09-21T09:41:19.476Z] >>> [apiv2][(partial)header] POST https://cloudresourcemanager.googleapis.com/v1/projects/my-purchase-manager-c2183:testIamPermissions x-goog-quota-user=projects/my-purchase-manager-c2183
+[debug] [2025-09-21T09:41:19.476Z] >>> [apiv2][body] POST https://cloudresourcemanager.googleapis.com/v1/projects/my-purchase-manager-c2183:testIamPermissions {"permissions":["cloudfunctions.functions.create","cloudfunctions.functions.delete","cloudfunctions.functions.get","cloudfunctions.functions.list","cloudfunctions.functions.update","cloudfunctions.operations.get","firebase.projects.get","firebasehosting.sites.update"]}
