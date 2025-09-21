@@ -27,11 +27,13 @@ const SITE_COLORS = [
 const getBaseUrl = (url) => {
     if (!url) return null;
     
-    // Видаляємо протокол, якщо він є
-    const withoutProtocol = url.replace(/^https?:\/\//, '');
+    // Видаляємо протокол та www, якщо вони є
+    const cleanUrl = url
+        .replace(/^https?:\/\//, '') // видаляємо протокол
+        .replace(/^www\./, '');      // видаляємо www.
     
     // Беремо все до першої крапки
-    const baseDomain = withoutProtocol.split('.')[0];
+    const baseDomain = cleanUrl.split('.')[0];
     return baseDomain || null;
 };
 
