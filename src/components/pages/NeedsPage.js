@@ -141,71 +141,71 @@ export const NeedsPage = ({
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Замовлено</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Назва</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">К-сть</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px] transition-all duration-300 ease-in-out">
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: hiddenColumns.pricePerUnit ? '40px' : '150px', transition: 'width 500ms ease-in-out' }}>
                                                 <div className="flex items-center gap-1">
-                                                    <div className="overflow-hidden transition-all duration-300 ease-in-out" style={{ width: hiddenColumns.pricePerUnit ? '0' : 'auto', opacity: hiddenColumns.pricePerUnit ? 0 : 1 }}>
+                                                    <div className="overflow-hidden transition-all duration-500 ease-in-out" style={{ maxWidth: hiddenColumns.pricePerUnit ? '0' : '110px', opacity: hiddenColumns.pricePerUnit ? 0 : 1 }}>
                                                         <span className="whitespace-nowrap">Ціна за од.</span>
                                                     </div>
                                                     <button 
                                                         onClick={() => toggleColumn('pricePerUnit')} 
-                                                        className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors"
+                                                        className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors shrink-0"
                                                         title={hiddenColumns.pricePerUnit ? "Показати ціну за одиницю" : undefined}
                                                     >
                                                         {hiddenColumns.pricePerUnit ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
                                                 </div>
                                             </th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Загальна ціна</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px] transition-all duration-300 ease-in-out">
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: '150px' }}>Загальна ціна</th>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: hiddenColumns.comment ? '40px' : '200px', transition: 'width 500ms ease-in-out' }}>
                                                 <div className="flex items-center gap-1">
-                                                    <div className="overflow-hidden transition-all duration-300 ease-in-out" style={{ width: hiddenColumns.comment ? '0' : 'auto', opacity: hiddenColumns.comment ? 0 : 1 }}>
+                                                    <div className="overflow-hidden transition-all duration-500 ease-in-out" style={{ maxWidth: hiddenColumns.comment ? '0' : '160px', opacity: hiddenColumns.comment ? 0 : 1 }}>
                                                         <span className="whitespace-nowrap">Коментар</span>
                                                     </div>
                                                     <button 
                                                         onClick={() => toggleColumn('comment')} 
-                                                        className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors"
+                                                        className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors shrink-0"
                                                         title={hiddenColumns.comment ? "Показати коментарі" : undefined}
                                                     >
                                                         {hiddenColumns.comment ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
                                                 </div>
                                             </th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px] transition-all duration-300 ease-in-out">
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: hiddenColumns.receipt ? '40px' : '200px', transition: 'width 500ms ease-in-out' }}>
                                                 <div className="flex items-center gap-1">
-                                                    <div className="overflow-hidden transition-all duration-300 ease-in-out" style={{ width: hiddenColumns.receipt ? '0' : 'auto', opacity: hiddenColumns.receipt ? 0 : 1 }}>
+                                                    <div className="overflow-hidden transition-all duration-500 ease-in-out" style={{ maxWidth: hiddenColumns.receipt ? '0' : '160px', opacity: hiddenColumns.receipt ? 0 : 1 }}>
                                                         <span className="whitespace-nowrap">Чек/Рахунок</span>
                                                     </div>
                                                     <button 
                                                         onClick={() => toggleColumn('receipt')} 
-                                                        className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors"
+                                                        className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors shrink-0"
                                                         title={hiddenColumns.receipt ? "Показати чеки/рахунки" : undefined}
                                                     >
                                                         {hiddenColumns.receipt ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
                                                 </div>
                                             </th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px] transition-all duration-300 ease-in-out">
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: hiddenColumns.paymentType ? '40px' : '150px', transition: 'width 500ms ease-in-out' }}>
                                                 <div className="flex items-center gap-1">
-                                                    <div className="overflow-hidden transition-all duration-300 ease-in-out" style={{ width: hiddenColumns.paymentType ? '0' : 'auto', opacity: hiddenColumns.paymentType ? 0 : 1 }}>
+                                                    <div className="overflow-hidden transition-all duration-500 ease-in-out" style={{ maxWidth: hiddenColumns.paymentType ? '0' : '110px', opacity: hiddenColumns.paymentType ? 0 : 1 }}>
                                                         <span className="whitespace-nowrap">Тип оплати</span>
                                                     </div>
                                                     <button 
                                                         onClick={() => toggleColumn('paymentType')} 
-                                                        className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors"
+                                                        className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors shrink-0"
                                                         title={hiddenColumns.paymentType ? "Показати типи оплати" : undefined}
                                                     >
                                                         {hiddenColumns.paymentType ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
                                                 </div>
                                             </th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px] transition-all duration-300 ease-in-out">
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: hiddenColumns.purchaseStatus ? '40px' : '180px', transition: 'width 500ms ease-in-out' }}>
                                                 <div className="flex items-center gap-1">
-                                                    <div className="overflow-hidden transition-all duration-300 ease-in-out" style={{ width: hiddenColumns.purchaseStatus ? '0' : 'auto', opacity: hiddenColumns.purchaseStatus ? 0 : 1 }}>
+                                                    <div className="overflow-hidden transition-all duration-500 ease-in-out" style={{ maxWidth: hiddenColumns.purchaseStatus ? '0' : '140px', opacity: hiddenColumns.purchaseStatus ? 0 : 1 }}>
                                                         <span className="whitespace-nowrap">Статус покупки</span>
                                                     </div>
                                                     <button 
                                                         onClick={() => toggleColumn('purchaseStatus')} 
-                                                        className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors"
+                                                        className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors shrink-0"
                                                         title={hiddenColumns.purchaseStatus ? "Показати статуси покупки" : undefined}
                                                     >
                                                         {hiddenColumns.purchaseStatus ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
@@ -230,11 +230,15 @@ export const NeedsPage = ({
                                                     ) : (item.name)}
                                                 </td>
                                                 <td className="px-4 py-2">{item.quantity}</td>
-                                                {!hiddenColumns.pricePerUnit && <td className="px-4 py-2">{item.pricePerUnit?.toFixed(2) || '0.00'}</td>}
-                                                <td className="px-4 py-2">{(item.quantity * item.pricePerUnit).toFixed(2)}</td>
-                                                {!hiddenColumns.comment && <td className="px-4 py-2">{item.comment}</td>}
-                                                {!hiddenColumns.receipt && (
-                                                    <td className="px-4 py-2">
+                                                <td className="px-4 py-2" style={{ width: hiddenColumns.pricePerUnit ? '0' : '150px', transition: 'width 500ms ease-in-out', overflow: 'hidden' }}>
+                                                    {!hiddenColumns.pricePerUnit && item.pricePerUnit?.toFixed(2) || '0.00'}
+                                                </td>
+                                                <td className="px-4 py-2" style={{ width: '150px' }}>{(item.quantity * item.pricePerUnit).toFixed(2)}</td>
+                                                <td className="px-4 py-2" style={{ width: hiddenColumns.comment ? '0' : '200px', transition: 'width 500ms ease-in-out', overflow: 'hidden' }}>
+                                                    {!hiddenColumns.comment && item.comment}
+                                                </td>
+                                                <td className="px-4 py-2" style={{ width: hiddenColumns.receipt ? '0' : '200px', transition: 'width 500ms ease-in-out', overflow: 'hidden' }}>
+                                                    {!hiddenColumns.receipt && (
                                                         <input 
                                                             type="url" 
                                                             defaultValue={item.receiptLink || ''} 
@@ -242,10 +246,10 @@ export const NeedsPage = ({
                                                             placeholder="Посилання..." 
                                                             className="w-full p-1 bg-slate-100 dark:bg-slate-600 rounded-md text-sm" 
                                                         />
-                                                    </td>
-                                                )}
-                                                {!hiddenColumns.paymentType && (
-                                                    <td className="px-4 py-2">
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-2" style={{ width: hiddenColumns.paymentType ? '0' : '150px', transition: 'width 500ms ease-in-out', overflow: 'hidden' }}>
+                                                    {!hiddenColumns.paymentType && (
                                                         <select
                                                             value={item.paymentType || PAYMENT_TYPES.NONE}
                                                             onChange={(e) => handleItemUpdate(req.id, index, 'paymentType', e.target.value)}
@@ -255,10 +259,10 @@ export const NeedsPage = ({
                                                             <option value={PAYMENT_TYPES.CASH}>{PAYMENT_TYPES.CASH}</option>
                                                             <option value={PAYMENT_TYPES.INVOICE}>{PAYMENT_TYPES.INVOICE}</option>
                                                         </select>
-                                                    </td>
-                                                )}
-                                                {!hiddenColumns.purchaseStatus && (
-                                                    <td className="px-4 py-2">
+                                                    )}
+                                                </td>
+                                                <td className="px-4 py-2" style={{ width: hiddenColumns.purchaseStatus ? '0' : '180px', transition: 'width 500ms ease-in-out', overflow: 'hidden' }}>
+                                                    {!hiddenColumns.purchaseStatus && (
                                                         <select
                                                             value={item.purchaseStatus || PURCHASE_STATUSES.NOT_PURCHASED}
                                                             onChange={(e) => handleItemUpdate(req.id, index, 'purchaseStatus', e.target.value)}
@@ -268,8 +272,8 @@ export const NeedsPage = ({
                                                                 <option key={status} value={status}>{status}</option>
                                                             ))}
                                                         </select>
-                                                    </td>
-                                                )}
+                                                    )}
+                                                </td>
                                             </tr>
                                         ))}
                                     </tbody>
