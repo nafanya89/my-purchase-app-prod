@@ -187,7 +187,7 @@ export const useHandlers = (db, auth, user, setNotification, setConfirmation) =>
         } else {
             try {
                 await updateDoc(
-                    doc(db, `/artifacts/${firebaseConfig.projectId}/public/data/purchaseRequests/${reqId}`),
+                    doc(db, `/artifacts/${firebaseConfig.projectId}/users/${user.uid}/purchaseRequests/${reqId}`),
                     { status }
                 );
                 setNotification('Статус оновлено!');
@@ -221,7 +221,7 @@ export const useHandlers = (db, auth, user, setNotification, setConfirmation) =>
         async () => {
             try {
                 await deleteDoc(
-                    doc(db, `/artifacts/${firebaseConfig.projectId}/public/data/purchaseRequests/${reqId}`)
+                    doc(db, `/artifacts/${firebaseConfig.projectId}/users/${user.uid}/purchaseRequests/${reqId}`)
                 );
                 setNotification('Запит видалено.');
                 setConfirmation({ isOpen: false });
@@ -252,7 +252,7 @@ export const useHandlers = (db, auth, user, setNotification, setConfirmation) =>
         }
         try {
             await addDoc(
-                collection(db, `/artifacts/${firebaseConfig.projectId}/public/data/purchaseRequests`),
+                collection(db, `/artifacts/${firebaseConfig.projectId}/users/${user.uid}/purchaseRequests`),
                 {
                     adminUid: user.uid,
                     title: newRequest.title.trim(),
@@ -272,14 +272,18 @@ export const useHandlers = (db, auth, user, setNotification, setConfirmation) =>
 
     const handleItemUpdate = async (reqId, itemIndex, field, value, purchaseRequests) => {
         const request = purchaseRequests.find(r => r.id === reqId);
-        if (!request) return;
-        const updatedItems = request.items.map((item, index) => 
-            index === itemIndex ? { ...item, [field]: value } : item
-        );
+        if (!request || !user) return;
+
+        const updatedItems = itemIndex === null 
+            ? value // якщо itemIndex === null, value - це вже масив items
+            : request.items.map((item, index) => 
+                index === itemIndex ? { ...item, [field]: value } : item
+            );
+
         try {
             await updateDoc(
-                doc(db, `/artifacts/${firebaseConfig.projectId}/public/data/purchaseRequests/${reqId}`),
-                { items: updatedItems }
+                doc(db, `/artifacts/${firebaseConfig.projectId}/users/${user.uid}/purchaseRequests/${reqId}`),
+                itemIndex === null ? { items: updatedItems } : { [`items.${itemIndex}.${field}`]: value }
             );
         } catch (err) {
             console.error("Error updating item:", err);

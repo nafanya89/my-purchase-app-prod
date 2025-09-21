@@ -39,10 +39,7 @@ export const useData = (db, user) => {
         );
 
         const unsubRequests = onSnapshot(
-            query(
-                collection(db, `/artifacts/${projectId}/public/data/purchaseRequests`),
-                where("adminUid", "==", uid)
-            ), 
+            collection(db, `/artifacts/${projectId}/users/${uid}/purchaseRequests`), 
             (snap) => {
                 const data = snap.docs
                     .map(doc => ({ id: doc.id, ...doc.data() }))
