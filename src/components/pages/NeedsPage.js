@@ -2,36 +2,37 @@ import React, { useState } from 'react';
 import { PlusCircle, Copy, CheckSquare, Square, Trash2, ChevronLeft, ChevronRight, MessageCircle, Group } from 'lucide-react';
 
 const SITE_COLORS = [
-    'text-purple-600',
-    'text-green-600',
-    'text-blue-600',
-    'text-red-600',
-    'text-yellow-600',
-    'text-pink-600',
-    'text-indigo-600',
-    'text-orange-600',
-    'text-teal-600',
-    'text-cyan-600',
-    'text-lime-600',
-    'text-emerald-600',
-    'text-sky-600',
-    'text-violet-600',
-    'text-fuchsia-600',
-    'text-rose-600',
-    'text-amber-600',
-    'text-slate-600',
-    'text-neutral-600',
-    'text-stone-600'
+    'text-purple-700 dark:text-purple-400',
+    'text-green-700 dark:text-green-400',
+    'text-blue-700 dark:text-blue-400',
+    'text-red-700 dark:text-red-400',
+    'text-pink-700 dark:text-pink-400',
+    'text-indigo-700 dark:text-indigo-400',
+    'text-orange-700 dark:text-orange-400',
+    'text-teal-700 dark:text-teal-400',
+    'text-cyan-700 dark:text-cyan-400',
+    'text-lime-700 dark:text-lime-400',
+    'text-emerald-700 dark:text-emerald-400',
+    'text-sky-700 dark:text-sky-400',
+    'text-violet-700 dark:text-violet-400',
+    'text-fuchsia-700 dark:text-fuchsia-400',
+    'text-rose-700 dark:text-rose-400',
+    'text-amber-700 dark:text-amber-400',
+    'text-yellow-700 dark:text-yellow-400',
+    'text-slate-700 dark:text-slate-400',
+    'text-neutral-700 dark:text-neutral-400',
+    'text-stone-700 dark:text-stone-400'
 ];
 
-const getDomainFromUrl = (url) => {
-    try {
-        if (!url) return null;
-        const domain = new URL(url).hostname.replace('www.', '');
-        return domain;
-    } catch {
-        return null;
-    }
+const getBaseUrl = (url) => {
+    if (!url) return null;
+    
+    // Видаляємо протокол, якщо він є
+    const withoutProtocol = url.replace(/^https?:\/\//, '');
+    
+    // Беремо все до першої крапки
+    const baseDomain = withoutProtocol.split('.')[0];
+    return baseDomain || null;
 };
 
 const PURCHASE_STATUSES = {
@@ -57,7 +58,7 @@ export const NeedsPage = ({
     handleItemUpdate 
 }) => {
     const [activeTab, setActiveTab] = useState('нове');
-    const [isGroupedBySite, setIsGroupedBySite] = useState(false);
+    const [groupedRequests, setGroupedRequests] = useState({});
     const [hiddenColumns, setHiddenColumns] = useState({
         pricePerUnit: false,
         comment: false,
@@ -82,69 +83,70 @@ export const NeedsPage = ({
         }));
     };
 
-    const toggleGroupBySite = () => {
-        setIsGroupedBySite(prev => !prev);
+    const toggleGroupBySite = (requestId) => {
+        setGroupedRequests(prev => ({
+            ...prev,
+            [requestId]: !prev[requestId]
+        }));
     };
 
-    const getGroupedItems = (items) => {
-        if (!isGroupedBySite) return items;
+    const getGroupedItems = (items, requestId) => {
+        if (!groupedRequests[requestId]) return items;
 
-        // Групуємо товари за доменами
-        const itemsByDomain = items.reduce((acc, item) => {
-            const domain = getDomainFromUrl(item.link);
-            if (!domain) {
+        // Групуємо товари за базовими URL
+        const itemsByBase = items.reduce((acc, item) => {
+            const baseUrl = getBaseUrl(item.link);
+            if (!baseUrl) {
                 if (!acc.noSite) acc.noSite = [];
                 acc.noSite.push(item);
                 return acc;
             }
-            if (!acc[domain]) acc[domain] = [];
-            acc[domain].push(item);
+            if (!acc[baseUrl]) acc[baseUrl] = [];
+            acc[baseUrl].push(item);
             return acc;
         }, {});
 
         // Знаходимо групи з більше ніж одним товаром
-        const groups = Object.entries(itemsByDomain)
-            .filter(([domain, items]) => domain !== 'noSite' && items.length > 1)
+        const groups = Object.entries(itemsByBase)
+            .filter(([baseUrl, items]) => baseUrl !== 'noSite' && items.length > 1)
             .sort((a, b) => b[1].length - a[1].length);
 
-        // Призначаємо кольори групам
-        const coloredGroups = groups.map(([domain, items], index) => ({
-            domain,
-            items,
-            color: SITE_COLORS[index % SITE_COLORS.length]
-        }));
+        // Створюємо унікальний набір кольорів для цього списку
+        const shuffledColors = [...SITE_COLORS]
+            .sort(() => Math.random() - 0.5)
+            .slice(0, groups.length);
 
-        // Створюємо мапу кольорів для доменів
-        const domainColors = coloredGroups.reduce((acc, { domain, color }) => {
-            acc[domain] = color;
+        // Призначаємо кольори групам
+        const baseColors = groups.reduce((acc, [baseUrl], index) => {
+            acc[baseUrl] = shuffledColors[index];
             return acc;
         }, {});
 
         // Сортуємо всі товари
         const sortedItems = [...items].sort((a, b) => {
-            const domainA = getDomainFromUrl(a.link);
-            const domainB = getDomainFromUrl(b.link);
+            const baseA = getBaseUrl(a.link);
+            const baseB = getBaseUrl(b.link);
             
-            // Якщо обидва товари з одного домену, який має колір
-            if (domainA && domainB && domainA === domainB && domainColors[domainA]) {
+            // Якщо обидва товари з одної групи
+            if (baseA && baseB && baseA === baseB && baseColors[baseA]) {
                 return 0;
             }
-            // Якщо тільки перший товар з групи з кольором
-            if (domainA && domainColors[domainA]) {
+            // Якщо тільки перший товар з групи
+            if (baseA && baseColors[baseA]) {
                 return -1;
             }
-            // Якщо тільки другий товар з групи з кольором
-            if (domainB && domainColors[domainB]) {
+            // Якщо тільки другий товар з групи
+            if (baseB && baseColors[baseB]) {
                 return 1;
             }
             return 0;
         });
 
         return sortedItems.map(item => {
-            const domain = getDomainFromUrl(item.link);
+            const baseUrl = getBaseUrl(item.link);
             return {
                 ...item,
-                color: domain ? domainColors[domain] : null
+                color: baseUrl ? baseColors[baseUrl] : null
             };
         });
     };
@@ -179,12 +181,6 @@ export const NeedsPage = ({
                     <button onClick={handleCopyPublicUrl} className="bg-indigo-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center gap-2">
                         <Copy size={18} /> Копіювати URL
                     </button>
-                    <button 
-                        onClick={toggleGroupBySite} 
-                        className={`${isGroupedBySite ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'} text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2`}
-                    >
-                        <Group size={18} /> {isGroupedBySite ? 'Скасувати групування' : 'Знайти однакові сайти'}
-                    </button>
                 </div>
             </div>
             <div className="border-b border-gray-200 dark:border-gray-700 mb-4">
@@ -216,13 +212,20 @@ export const NeedsPage = ({
                                         від: <span className="font-medium">{req.requesterName}</span>, {req.createdAt.toDate().toLocaleString()}
                                     </p>
                                     <p className="font-bold text-md mt-2">Сума: {requestTotal.toFixed(2)} грн</p>
-                                    <div className="flex items-center gap-2 mt-2">
+                                    <div className="flex items-center gap-4 mt-2">
                                         <button 
                                             onClick={() => toggleComment(req.id)} 
                                             className="text-gray-500 hover:text-gray-700 flex items-center gap-1 text-sm"
                                         >
                                             <MessageCircle size={16} />
                                             {expandedComments[req.id] ? 'Згорнути коментар' : 'Розгорнути коментар'}
+                                        </button>
+                                        <button 
+                                            onClick={() => toggleGroupBySite(req.id)} 
+                                            className={`${groupedRequests[req.id] ? 'text-green-600 dark:text-green-400' : 'text-gray-500'} hover:text-gray-700 flex items-center gap-1 text-sm`}
+                                        >
+                                            <Group size={16} />
+                                            {groupedRequests[req.id] ? 'Скасувати групування' : 'Знайти однакові сайти'}
                                         </button>
                                     </div>
                                     {expandedComments[req.id] && (
@@ -322,7 +325,7 @@ export const NeedsPage = ({
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                        {getGroupedItems(req.items).map((item, index) => (
+                                        {getGroupedItems(req.items, req.id).map((item, index) => (
                                             <tr key={index}>
                                                 <td className="px-4 py-2">
                                                     <button onClick={() => handleToggleItemOrdered(req.id, index, !item.ordered)}>
