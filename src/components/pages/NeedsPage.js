@@ -1,5 +1,38 @@
 import React, { useState } from 'react';
-import { PlusCircle, Copy, CheckSquare, Square, Trash2, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
+import { PlusCircle, Copy, CheckSquare, Square, Trash2, ChevronLeft, ChevronRight, MessageCircle, Group } from 'lucide-react';
+
+const SITE_COLORS = [
+    'text-purple-600',
+    'text-green-600',
+    'text-blue-600',
+    'text-red-600',
+    'text-yellow-600',
+    'text-pink-600',
+    'text-indigo-600',
+    'text-orange-600',
+    'text-teal-600',
+    'text-cyan-600',
+    'text-lime-600',
+    'text-emerald-600',
+    'text-sky-600',
+    'text-violet-600',
+    'text-fuchsia-600',
+    'text-rose-600',
+    'text-amber-600',
+    'text-slate-600',
+    'text-neutral-600',
+    'text-stone-600'
+];
+
+const getDomainFromUrl = (url) => {
+    try {
+        if (!url) return null;
+        const domain = new URL(url).hostname.replace('www.', '');
+        return domain;
+    } catch {
+        return null;
+    }
+};
 
 const PURCHASE_STATUSES = {
     NOT_PURCHASED: 'не куплено',
@@ -24,6 +57,7 @@ export const NeedsPage = ({
     handleItemUpdate 
 }) => {
     const [activeTab, setActiveTab] = useState('нове');
+    const [isGroupedBySite, setIsGroupedBySite] = useState(false);
     const [hiddenColumns, setHiddenColumns] = useState({
         pricePerUnit: false,
         comment: false,
@@ -46,6 +80,73 @@ export const NeedsPage = ({
             ...prev,
             [requestId]: !prev[requestId]
         }));
+    };
+
+    const toggleGroupBySite = () => {
+        setIsGroupedBySite(prev => !prev);
+    };
+
+    const getGroupedItems = (items) => {
+        if (!isGroupedBySite) return items;
+
+        // Групуємо товари за доменами
+        const itemsByDomain = items.reduce((acc, item) => {
+            const domain = getDomainFromUrl(item.link);
+            if (!domain) {
+                if (!acc.noSite) acc.noSite = [];
+                acc.noSite.push(item);
+                return acc;
+            }
+            if (!acc[domain]) acc[domain] = [];
+            acc[domain].push(item);
+            return acc;
+        }, {});
+
+        // Знаходимо групи з більше ніж одним товаром
+        const groups = Object.entries(itemsByDomain)
+            .filter(([domain, items]) => domain !== 'noSite' && items.length > 1)
+            .sort((a, b) => b[1].length - a[1].length);
+
+        // Призначаємо кольори групам
+        const coloredGroups = groups.map(([domain, items], index) => ({
+            domain,
+            items,
+            color: SITE_COLORS[index % SITE_COLORS.length]
+        }));
+
+        // Створюємо мапу кольорів для доменів
+        const domainColors = coloredGroups.reduce((acc, { domain, color }) => {
+            acc[domain] = color;
+            return acc;
+        }, {});
+
+        // Сортуємо всі товари
+        const sortedItems = [...items].sort((a, b) => {
+            const domainA = getDomainFromUrl(a.link);
+            const domainB = getDomainFromUrl(b.link);
+            
+            // Якщо обидва товари з одного домену, який має колір
+            if (domainA && domainB && domainA === domainB && domainColors[domainA]) {
+                return 0;
+            }
+            // Якщо тільки перший товар з групи з кольором
+            if (domainA && domainColors[domainA]) {
+                return -1;
+            }
+            // Якщо тільки другий товар з групи з кольором
+            if (domainB && domainColors[domainB]) {
+                return 1;
+            }
+            return 0;
+        });
+
+        return sortedItems.map(item => {
+            const domain = getDomainFromUrl(item.link);
+            return {
+                ...item,
+                color: domain ? domainColors[domain] : null
+            };
+        });
     };
     const { totalSum, cashSum, invoiceSum } = purchaseRequests.reduce((acc, req) => {
         req.items.forEach(item => {
@@ -77,6 +178,12 @@ export const NeedsPage = ({
                     </button>
                     <button onClick={handleCopyPublicUrl} className="bg-indigo-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-indigo-700 flex items-center gap-2">
                         <Copy size={18} /> Копіювати URL
+                    </button>
+                    <button 
+                        onClick={toggleGroupBySite} 
+                        className={`${isGroupedBySite ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-600 hover:bg-gray-700'} text-white font-semibold px-4 py-2 rounded-lg flex items-center gap-2`}
+                    >
+                        <Group size={18} /> {isGroupedBySite ? 'Скасувати групування' : 'Знайти однакові сайти'}
                     </button>
                 </div>
             </div>
@@ -215,7 +322,7 @@ export const NeedsPage = ({
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                        {req.items.map((item, index) => (
+                                        {getGroupedItems(req.items).map((item, index) => (
                                             <tr key={index}>
                                                 <td className="px-4 py-2">
                                                     <button onClick={() => handleToggleItemOrdered(req.id, index, !item.ordered)}>
@@ -224,7 +331,12 @@ export const NeedsPage = ({
                                                 </td>
                                                 <td className="px-4 py-2 font-medium">
                                                     {item.link ? (
-                                                        <a href={item.link} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
+                                                        <a 
+                                                            href={item.link} 
+                                                            target="_blank" 
+                                                            rel="noopener noreferrer" 
+                                                            className={`hover:underline ${item.color || 'text-blue-500'}`}
+                                                        >
                                                             {item.name}
                                                         </a>
                                                     ) : (item.name)}
