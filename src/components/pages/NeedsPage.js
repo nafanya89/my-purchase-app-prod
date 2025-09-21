@@ -141,43 +141,73 @@ export const NeedsPage = ({
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Замовлено</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Назва</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">К-сть</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px]">
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px] transition-all duration-300 ease-in-out">
                                                 <div className="flex items-center gap-1">
-                                                    {!hiddenColumns.pricePerUnit && <span>Ціна за од.</span>}
-                                                    <button onClick={() => toggleColumn('pricePerUnit')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
+                                                    <div className="overflow-hidden transition-all duration-300 ease-in-out" style={{ width: hiddenColumns.pricePerUnit ? '0' : 'auto', opacity: hiddenColumns.pricePerUnit ? 0 : 1 }}>
+                                                        <span className="whitespace-nowrap">Ціна за од.</span>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => toggleColumn('pricePerUnit')} 
+                                                        className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors"
+                                                        title={hiddenColumns.pricePerUnit ? "Показати ціну за одиницю" : undefined}
+                                                    >
                                                         {hiddenColumns.pricePerUnit ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
                                                 </div>
                                             </th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Загальна ціна</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px]">
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px] transition-all duration-300 ease-in-out">
                                                 <div className="flex items-center gap-1">
-                                                    {!hiddenColumns.comment && <span>Коментар</span>}
-                                                    <button onClick={() => toggleColumn('comment')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
+                                                    <div className="overflow-hidden transition-all duration-300 ease-in-out" style={{ width: hiddenColumns.comment ? '0' : 'auto', opacity: hiddenColumns.comment ? 0 : 1 }}>
+                                                        <span className="whitespace-nowrap">Коментар</span>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => toggleColumn('comment')} 
+                                                        className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors"
+                                                        title={hiddenColumns.comment ? "Показати коментарі" : undefined}
+                                                    >
                                                         {hiddenColumns.comment ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
                                                 </div>
                                             </th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px]">
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px] transition-all duration-300 ease-in-out">
                                                 <div className="flex items-center gap-1">
-                                                    {!hiddenColumns.receipt && <span>Чек/Рахунок</span>}
-                                                    <button onClick={() => toggleColumn('receipt')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
+                                                    <div className="overflow-hidden transition-all duration-300 ease-in-out" style={{ width: hiddenColumns.receipt ? '0' : 'auto', opacity: hiddenColumns.receipt ? 0 : 1 }}>
+                                                        <span className="whitespace-nowrap">Чек/Рахунок</span>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => toggleColumn('receipt')} 
+                                                        className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors"
+                                                        title={hiddenColumns.receipt ? "Показати чеки/рахунки" : undefined}
+                                                    >
                                                         {hiddenColumns.receipt ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
                                                 </div>
                                             </th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px]">
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px] transition-all duration-300 ease-in-out">
                                                 <div className="flex items-center gap-1">
-                                                    {!hiddenColumns.paymentType && <span>Тип оплати</span>}
-                                                    <button onClick={() => toggleColumn('paymentType')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
+                                                    <div className="overflow-hidden transition-all duration-300 ease-in-out" style={{ width: hiddenColumns.paymentType ? '0' : 'auto', opacity: hiddenColumns.paymentType ? 0 : 1 }}>
+                                                        <span className="whitespace-nowrap">Тип оплати</span>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => toggleColumn('paymentType')} 
+                                                        className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors"
+                                                        title={hiddenColumns.paymentType ? "Показати типи оплати" : undefined}
+                                                    >
                                                         {hiddenColumns.paymentType ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
                                                 </div>
                                             </th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px]">
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px] transition-all duration-300 ease-in-out">
                                                 <div className="flex items-center gap-1">
-                                                    {!hiddenColumns.purchaseStatus && <span>Статус покупки</span>}
-                                                    <button onClick={() => toggleColumn('purchaseStatus')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
+                                                    <div className="overflow-hidden transition-all duration-300 ease-in-out" style={{ width: hiddenColumns.purchaseStatus ? '0' : 'auto', opacity: hiddenColumns.purchaseStatus ? 0 : 1 }}>
+                                                        <span className="whitespace-nowrap">Статус покупки</span>
+                                                    </div>
+                                                    <button 
+                                                        onClick={() => toggleColumn('purchaseStatus')} 
+                                                        className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors"
+                                                        title={hiddenColumns.purchaseStatus ? "Показати статуси покупки" : undefined}
+                                                    >
                                                         {hiddenColumns.purchaseStatus ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
                                                 </div>
