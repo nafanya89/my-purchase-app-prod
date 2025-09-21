@@ -23,11 +23,12 @@ yarn-error.log*
 
 # Firebase
 .firebase/
-firebase-debug.log*
-ui-debug.log*
-database-debug.log*
-firestore-debug.log*
-pubsub-debug.log*
+firebase-debug*.log
+ui-debug*.log
+database-debug*.log
+firestore-debug*.log
+pubsub-debug*.log
+package-lock *.json
 
 # IDE
 .idea/

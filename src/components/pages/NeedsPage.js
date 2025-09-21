@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { PlusCircle, Copy, CheckSquare, Square, Trash2, ChevronLeft, ChevronRight, MessageCircle, Group } from 'lucide-react';
 
 const SITE_COLORS = [
@@ -37,9 +37,6 @@ const getBaseUrl = (url) => {
     return baseDomain || null;
 };
 
-const getItemCode = (requestId, itemIndex, itemCodes) => {
-    return itemCodes[`${requestId}-${itemIndex}`] || '00000';
-};
 
 const PURCHASE_STATUSES = {
     NOT_PURCHASED: 'не куплено',
@@ -63,65 +60,9 @@ export const NeedsPage = ({
     handleToggleItemOrdered, 
     handleItemUpdate 
 }) => {
-    // Стан для кодів товарів
-    const [itemCodes, setItemCodes] = useState({});
-    const [codesGenerated, setCodesGenerated] = useState(false);
-
-    // Генеруємо коди для всіх товарів
-    useEffect(() => {
-        if (codesGenerated || purchaseRequests.length === 0) return;
-
-        // Сортуємо списки за часом створення
-        const sortedRequests = [...purchaseRequests].sort((a, b) => 
-            a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
-        );
-
-        let counter = 1;
-        const newCodes = {};
-
-        // Генеруємо коди для всіх товарів
-        sortedRequests.forEach(request => {
-            request.items.forEach((_, index) => {
-                const key = `${request.id}-${index}`;
-                newCodes[key] = counter.toString().padStart(5, '0');
-                counter++;
-            });
-        });
-
-        setItemCodes(newCodes);
-        setCodesGenerated(true);
-    }, [purchaseRequests, codesGenerated]);
-
-    // Оновлюємо коди в Firebase
-    useEffect(() => {
-        const updateCodes = async () => {
-            if (!codesGenerated || Object.keys(itemCodes).length === 0) return;
-
-            const sortedRequests = [...purchaseRequests].sort((a, b) => 
-                a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
-            );
-
-            for (const request of sortedRequests) {
-                const updatedItems = request.items.map((item, index) => {
-                    const code = itemCodes[`${request.id}-${index}`];
-                    return code ? { ...item, code } : item;
-                });
-
-                try {
-                    await handleItemUpdate(request.id, null, 'items', updatedItems, purchaseRequests);
-                    await new Promise(resolve => setTimeout(resolve, 500));
-                } catch (error) {
-                    console.error('Error updating request:', error);
-                }
-            }
-        };
-
-        updateCodes();
-    }, [purchaseRequests, itemCodes, codesGenerated, handleItemUpdate]);
     const [activeTab, setActiveTab] = useState('нове');
     const [groupedRequests, setGroupedRequests] = useState({});
     const [hiddenColumns, setHiddenColumns] = useState({
-        code: false,
         pricePerUnit: false,
         comment: false,
         receipt: false,
@@ -331,20 +272,6 @@ export const NeedsPage = ({
                                     <thead className="bg-gray-50 dark:bg-slate-700">
                                         <tr>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Замовлено</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase" style={{ width: hiddenColumns.code ? '40px' : '100px', transition: 'width 500ms ease-in-out' }}>
-                                                <div className="flex items-center gap-1">
-                                                    <div className="overflow-hidden transition-all duration-500 ease-in-out" style={{ maxWidth: hiddenColumns.code ? '0' : '60px', opacity: hiddenColumns.code ? 0 : 1 }}>
-                                                        <span className="whitespace-nowrap">Шифр</span>
-                                                    </div>
-                                                    <button 
-                                                        onClick={() => toggleColumn('code')} 
-                                                        className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors shrink-0"
-                                                        title={hiddenColumns.code ? "Показати шифри" : "Приховати шифри"}
-                                                    >
-                                                        {hiddenColumns.code ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
-                                                    </button>
-                                                </div>
-                                            </th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Назва</th>
                                             {groupedRequests[req.id] && (
                                                 <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Магазин</th>
@@ -430,9 +357,6 @@ export const NeedsPage = ({
                                                     <button onClick={() => handleToggleItemOrdered(req.id, item.originalIndex, !item.ordered)}>
                                                         {item.ordered ? <CheckSquare className="text-green-500" /> : <Square className="text-slate-400" />}
                                                     </button>
-                                                </td>
-                                                <td className="px-4 py-2 font-mono" style={{ width: hiddenColumns.code ? '0' : '100px', transition: 'width 500ms ease-in-out', overflow: 'hidden' }}>
-                                                    {!hiddenColumns.code && getItemCode(req.id, item.originalIndex, itemCodes)}
                                                 </td>
                                                 <td className="px-4 py-2 font-medium">
                                                     {item.link ? (

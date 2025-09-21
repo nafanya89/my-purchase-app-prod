@@ -187,7 +187,7 @@ export const useHandlers = (db, auth, user, setNotification, setConfirmation) =>
         } else {
             try {
                 await updateDoc(
-                    doc(db, `/artifacts/${firebaseConfig.projectId}/users/${user.uid}/purchaseRequests/${reqId}`),
+                    doc(db, `/artifacts/${firebaseConfig.projectId}/public/data/purchaseRequests/${reqId}`),
                     { status }
                 );
                 setNotification('Статус оновлено!');
@@ -252,7 +252,7 @@ export const useHandlers = (db, auth, user, setNotification, setConfirmation) =>
         }
         try {
             await addDoc(
-                collection(db, `/artifacts/${firebaseConfig.projectId}/users/${user.uid}/purchaseRequests`),
+                collection(db, `/artifacts/${firebaseConfig.projectId}/public/data/purchaseRequests`),
                 {
                     adminUid: user.uid,
                     title: newRequest.title.trim(),
@@ -282,7 +282,7 @@ export const useHandlers = (db, auth, user, setNotification, setConfirmation) =>
 
         try {
             await updateDoc(
-                doc(db, `/artifacts/${firebaseConfig.projectId}/users/${user.uid}/purchaseRequests/${reqId}`),
+                doc(db, `/artifacts/${firebaseConfig.projectId}/public/data/purchaseRequests/${reqId}`),
                 itemIndex === null ? { items: updatedItems } : { [`items.${itemIndex}.${field}`]: value }
             );
         } catch (err) {
