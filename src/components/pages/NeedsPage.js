@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlusCircle, Copy, CheckSquare, Square, Trash2, ChevronDown, ChevronUp, MessageCircle } from 'lucide-react';
+import { PlusCircle, Copy, CheckSquare, Square, Trash2, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 
 const PURCHASE_STATUSES = {
     NOT_PURCHASED: 'не куплено',
@@ -141,44 +141,44 @@ export const NeedsPage = ({
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Замовлено</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Назва</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">К-сть</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px]">
                                                 <div className="flex items-center gap-1">
-                                                    Ціна за од.
+                                                    {!hiddenColumns.pricePerUnit && <span>Ціна за од.</span>}
                                                     <button onClick={() => toggleColumn('pricePerUnit')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
-                                                        {hiddenColumns.pricePerUnit ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                                                        {hiddenColumns.pricePerUnit ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
                                                 </div>
                                             </th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Загальна ціна</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px]">
                                                 <div className="flex items-center gap-1">
-                                                    Коментар
+                                                    {!hiddenColumns.comment && <span>Коментар</span>}
                                                     <button onClick={() => toggleColumn('comment')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
-                                                        {hiddenColumns.comment ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                                                        {hiddenColumns.comment ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
                                                 </div>
                                             </th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px]">
                                                 <div className="flex items-center gap-1">
-                                                    Чек/Рахунок
+                                                    {!hiddenColumns.receipt && <span>Чек/Рахунок</span>}
                                                     <button onClick={() => toggleColumn('receipt')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
-                                                        {hiddenColumns.receipt ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                                                        {hiddenColumns.receipt ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
                                                 </div>
                                             </th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px]">
                                                 <div className="flex items-center gap-1">
-                                                    Тип оплати
+                                                    {!hiddenColumns.paymentType && <span>Тип оплати</span>}
                                                     <button onClick={() => toggleColumn('paymentType')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
-                                                        {hiddenColumns.paymentType ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                                                        {hiddenColumns.paymentType ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
                                                 </div>
                                             </th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase min-w-[40px]">
                                                 <div className="flex items-center gap-1">
-                                                    Статус покупки
+                                                    {!hiddenColumns.purchaseStatus && <span>Статус покупки</span>}
                                                     <button onClick={() => toggleColumn('purchaseStatus')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
-                                                        {hiddenColumns.purchaseStatus ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                                                        {hiddenColumns.purchaseStatus ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
                                                 </div>
                                             </th>
