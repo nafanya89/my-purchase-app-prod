@@ -1,4 +1,7 @@
-export const firebaseConfig = {
+import { initializeApp } from 'firebase/app';
+import { getFirestore } from 'firebase/firestore';
+
+const firebaseConfig = {
   apiKey: "AIzaSyCNRIH-seADU45d5wQigQfnX5lmiQpbHLc",
   authDomain: "my-purchase-manager-c2183.firebaseapp.com",
   projectId: "my-purchase-manager-c2183",
@@ -7,4 +10,6 @@ export const firebaseConfig = {
   appId: "1:185303827104:web:5bf2a97b4961b0a181ffc5"
 };
 
+const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app);
 export const ADMIN_EMAIL = "vasylbodnaruk@gmail.com";
