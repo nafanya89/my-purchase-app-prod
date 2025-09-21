@@ -37,44 +37,9 @@ const getBaseUrl = (url) => {
     return baseDomain || null;
 };
 
-const generateItemCode = (allRequests, currentRequestId, itemIndex, itemCodes, setItemCodes) => {
-    const codeKey = `${currentRequestId}-${itemIndex}`;
-    
-    // Якщо код вже є в локальному стані, повертаємо його
-    if (itemCodes[codeKey]) {
-        return itemCodes[codeKey];
-    }
-
-    // Сортуємо списки за часом створення
-    const sortedRequests = [...allRequests].sort((a, b) => 
-        a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
-    );
-
-    // Збираємо всі товари в порядку
-    const allItems = [];
-    sortedRequests.forEach(req => {
-        req.items.forEach((item, idx) => {
-            const key = `${req.id}-${idx}`;
-            allItems.push({
-                key,
-                requestId: req.id,
-                itemIndex: idx,
-                item
-            });
-        });
-    });
-
-    // Генеруємо коди для всіх товарів
-    const newCodes = {};
-    allItems.forEach((item, index) => {
-        newCodes[item.key] = (index + 1).toString().padStart(5, '0');
-    });
-
-    // Оновлюємо локальний стан
-    setItemCodes(newCodes);
-
-    // Повертаємо код для поточного товару
-    return newCodes[codeKey];
+const getItemCode = (requestId, itemIndex, itemCodes) => {
+    const codeKey = `${requestId}-${itemIndex}`;
+    return itemCodes[codeKey] || '00000';
 };
 
 const PURCHASE_STATUSES = {
@@ -102,14 +67,31 @@ export const NeedsPage = ({
     // Ефект для міграції кодів
     const [itemCodes, setItemCodes] = useState({});
 
-    // Ініціалізуємо коди при першому рендері
+    // Ініціалізуємо коди при першому рендері або зміні списків
     React.useEffect(() => {
-        if (Object.keys(itemCodes).length === 0 && purchaseRequests.length > 0) {
-            // Беремо перший товар, щоб згенерувати всі коди
-            const firstRequest = purchaseRequests[0];
-            generateItemCode(purchaseRequests, firstRequest.id, 0, itemCodes, setItemCodes);
-        }
-    }, [purchaseRequests, itemCodes]);
+        // Сортуємо списки за часом створення
+        const sortedRequests = [...purchaseRequests].sort((a, b) => 
+            a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
+        );
+
+        // Збираємо всі товари в порядку
+        const allItems = [];
+        sortedRequests.forEach(req => {
+            req.items.forEach((item, idx) => {
+                const key = `${req.id}-${idx}`;
+                allItems.push({ key });
+            });
+        });
+
+        // Генеруємо коди для всіх товарів
+        const newCodes = {};
+        allItems.forEach((item, index) => {
+            newCodes[item.key] = (index + 1).toString().padStart(5, '0');
+        });
+
+        // Оновлюємо локальний стан
+        setItemCodes(newCodes);
+    }, [purchaseRequests]); // Залежність тільки від списків
     const [activeTab, setActiveTab] = useState('нове');
     const [groupedRequests, setGroupedRequests] = useState({});
     const [hiddenColumns, setHiddenColumns] = useState({
@@ -424,7 +406,7 @@ export const NeedsPage = ({
                                                     </button>
                                                 </td>
                                                 <td className="px-4 py-2 font-mono" style={{ width: hiddenColumns.code ? '0' : '100px', transition: 'width 500ms ease-in-out', overflow: 'hidden' }}>
-                                                    {!hiddenColumns.code && generateItemCode(purchaseRequests, req.id, item.originalIndex, itemCodes, setItemCodes)}
+                                                    {!hiddenColumns.code && getItemCode(req.id, item.originalIndex, itemCodes)}
                                                 </td>
                                                 <td className="px-4 py-2 font-medium">
                                                     {item.link ? (
