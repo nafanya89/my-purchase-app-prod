@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { PlusCircle, Copy, CheckSquare, Square, Trash2, ChevronLeft, ChevronRight, MessageCircle, Group } from 'lucide-react';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db } from '../../config/firebase';
 
 const SITE_COLORS = [
     'text-purple-700 dark:text-purple-400',
@@ -39,11 +37,12 @@ const getBaseUrl = (url) => {
     return baseDomain || null;
 };
 
-const generateItemCode = (allRequests, currentRequestId, itemIndex) => {
-    // Якщо у товару вже є код, повертаємо його
-    const currentRequest = allRequests.find(req => req.id === currentRequestId);
-    if (currentRequest?.items[itemIndex]?.code) {
-        return currentRequest.items[itemIndex].code;
+const generateItemCode = (allRequests, currentRequestId, itemIndex, itemCodes, setItemCodes) => {
+    const codeKey = `${currentRequestId}-${itemIndex}`;
+    
+    // Якщо код вже є в локальному стані, повертаємо його
+    if (itemCodes[codeKey]) {
+        return itemCodes[codeKey];
     }
 
     // Сортуємо списки за часом створення
@@ -55,7 +54,9 @@ const generateItemCode = (allRequests, currentRequestId, itemIndex) => {
     const allItems = [];
     sortedRequests.forEach(req => {
         req.items.forEach((item, idx) => {
+            const key = `${req.id}-${idx}`;
             allItems.push({
+                key,
                 requestId: req.id,
                 itemIndex: idx,
                 item
@@ -63,13 +64,17 @@ const generateItemCode = (allRequests, currentRequestId, itemIndex) => {
         });
     });
 
-    // Знаходимо індекс поточного товару
-    const currentItemIndex = allItems.findIndex(
-        item => item.requestId === currentRequestId && item.itemIndex === itemIndex
-    );
+    // Генеруємо коди для всіх товарів
+    const newCodes = {};
+    allItems.forEach((item, index) => {
+        newCodes[item.key] = (index + 1).toString().padStart(5, '0');
+    });
 
-    // Генеруємо код на основі позиції
-    return (currentItemIndex + 1).toString().padStart(5, '0');
+    // Оновлюємо локальний стан
+    setItemCodes(newCodes);
+
+    // Повертаємо код для поточного товару
+    return newCodes[codeKey];
 };
 
 const PURCHASE_STATUSES = {
@@ -95,71 +100,16 @@ export const NeedsPage = ({
     handleItemUpdate 
 }) => {
     // Ефект для міграції кодів
-    const [isMigrating, setIsMigrating] = useState(false);
+    const [itemCodes, setItemCodes] = useState({});
 
+    // Ініціалізуємо коди при першому рендері
     React.useEffect(() => {
-        const migrateItemCodes = async () => {
-            if (isMigrating) return;
-            setIsMigrating(true);
-
-            try {
-                // Проходимо по всіх списках в порядку створення
-                const sortedRequests = [...purchaseRequests].sort((a, b) => 
-                    a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
-                );
-
-                // Створюємо копію списків для оновлення
-                const updatedRequests = sortedRequests.map(req => ({
-                    ...req,
-                    items: [...req.items]
-                }));
-
-                // Збираємо всі товари для нумерації
-                let codeCounter = 1;
-                
-                // Оновлюємо коди в кожному списку
-                for (const request of updatedRequests) {
-                    let hasChanges = false;
-                    
-                    for (let i = 0; i < request.items.length; i++) {
-                        const newCode = codeCounter.toString().padStart(5, '0');
-                        if (request.items[i].code !== newCode) {
-                            request.items[i] = {
-                                ...request.items[i],
-                                code: newCode
-                            };
-                            hasChanges = true;
-                        }
-                        codeCounter++;
-                    }
-
-                    // Оновлюємо весь список якщо були зміни
-                    if (hasChanges) {
-                        try {
-                            const requestRef = doc(db, 'purchaseRequests', request.id);
-                            await updateDoc(requestRef, {
-                                items: request.items
-                            });
-                            // Чекаємо трохи між оновленнями
-                            await new Promise(resolve => setTimeout(resolve, 500));
-                        } catch (error) {
-                            console.error('Error updating request:', error);
-                        }
-                    }
-                }
-            } finally {
-                setIsMigrating(false);
-            }
-        };
-
-        const needsMigration = purchaseRequests.some(req => 
-            req.items.some(item => !item.code)
-        );
-
-        if (needsMigration && !isMigrating) {
-            migrateItemCodes();
+        if (Object.keys(itemCodes).length === 0 && purchaseRequests.length > 0) {
+            // Беремо перший товар, щоб згенерувати всі коди
+            const firstRequest = purchaseRequests[0];
+            generateItemCode(purchaseRequests, firstRequest.id, 0, itemCodes, setItemCodes);
         }
-    }, [purchaseRequests, isMigrating]);
+    }, [purchaseRequests, itemCodes]);
     const [activeTab, setActiveTab] = useState('нове');
     const [groupedRequests, setGroupedRequests] = useState({});
     const [hiddenColumns, setHiddenColumns] = useState({
@@ -474,7 +424,7 @@ export const NeedsPage = ({
                                                     </button>
                                                 </td>
                                                 <td className="px-4 py-2 font-mono" style={{ width: hiddenColumns.code ? '0' : '100px', transition: 'width 500ms ease-in-out', overflow: 'hidden' }}>
-                                                    {!hiddenColumns.code && (item.code || generateItemCode(purchaseRequests, req.id, item.originalIndex))}
+                                                    {!hiddenColumns.code && generateItemCode(purchaseRequests, req.id, item.originalIndex, itemCodes, setItemCodes)}
                                                 </td>
                                                 <td className="px-4 py-2 font-medium">
                                                     {item.link ? (
