@@ -149,7 +149,7 @@ export const NeedsPage = ({
                                                     <button 
                                                         onClick={() => toggleColumn('pricePerUnit')} 
                                                         className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors shrink-0"
-                                                        title={hiddenColumns.pricePerUnit ? "Показати ціну за одиницю" : undefined}
+                                                        title={hiddenColumns.pricePerUnit ? "Показати ціну за одиницю" : "Приховати ціну за одиницю"}
                                                     >
                                                         {hiddenColumns.pricePerUnit ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
@@ -164,7 +164,7 @@ export const NeedsPage = ({
                                                     <button 
                                                         onClick={() => toggleColumn('comment')} 
                                                         className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors shrink-0"
-                                                        title={hiddenColumns.comment ? "Показати коментарі" : undefined}
+                                                        title={hiddenColumns.comment ? "Показати коментарі" : "Приховати коментарі"}
                                                     >
                                                         {hiddenColumns.comment ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
@@ -178,7 +178,7 @@ export const NeedsPage = ({
                                                     <button 
                                                         onClick={() => toggleColumn('receipt')} 
                                                         className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors shrink-0"
-                                                        title={hiddenColumns.receipt ? "Показати чеки/рахунки" : undefined}
+                                                        title={hiddenColumns.receipt ? "Показати чеки/рахунки" : "Приховати чеки/рахунки"}
                                                     >
                                                         {hiddenColumns.receipt ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
@@ -192,7 +192,7 @@ export const NeedsPage = ({
                                                     <button 
                                                         onClick={() => toggleColumn('paymentType')} 
                                                         className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors shrink-0"
-                                                        title={hiddenColumns.paymentType ? "Показати типи оплати" : undefined}
+                                                        title={hiddenColumns.paymentType ? "Показати типи оплати" : "Приховати типи оплати"}
                                                     >
                                                         {hiddenColumns.paymentType ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
@@ -206,7 +206,7 @@ export const NeedsPage = ({
                                                     <button 
                                                         onClick={() => toggleColumn('purchaseStatus')} 
                                                         className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1 transition-colors shrink-0"
-                                                        title={hiddenColumns.purchaseStatus ? "Показати статуси покупки" : undefined}
+                                                        title={hiddenColumns.purchaseStatus ? "Показати статуси покупки" : "Приховати статуси покупки"}
                                                     >
                                                         {hiddenColumns.purchaseStatus ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
                                                     </button>
