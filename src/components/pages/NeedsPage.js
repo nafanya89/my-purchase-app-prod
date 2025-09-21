@@ -44,9 +44,8 @@ const generateItemCode = (allRequests, currentRequestId, itemIndex) => {
         return currentRequest.items[itemIndex].code;
     }
 
+    // Знаходимо максимальний код серед всіх товарів
     let maxCode = 0;
-
-    // Шукаємо максимальний код серед всіх товарів у всіх списках
     allRequests.forEach(req => {
         req.items.forEach(item => {
             if (item.code) {
@@ -58,8 +57,29 @@ const generateItemCode = (allRequests, currentRequestId, itemIndex) => {
         });
     });
 
+    // Рахуємо кількість товарів без коду до поточного
+    let itemsBeforeCurrent = 0;
+    let foundCurrent = false;
+
+    allRequests.forEach(req => {
+        if (foundCurrent) return;
+        
+        req.items.forEach((item, idx) => {
+            if (foundCurrent) return;
+            
+            if (req.id === currentRequestId && idx === itemIndex) {
+                foundCurrent = true;
+                return;
+            }
+            
+            if (!item.code) {
+                itemsBeforeCurrent++;
+            }
+        });
+    });
+
     // Генеруємо наступний код
-    const nextCode = maxCode + 1;
+    const nextCode = maxCode + itemsBeforeCurrent + 1;
     
     // Форматуємо код до 5 цифр з ведучими нулями
     return nextCode.toString().padStart(5, '0');
@@ -95,30 +115,42 @@ export const NeedsPage = ({
                 a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
             );
 
-            // Збираємо всі товари без кодів
-            const itemsWithoutCode = [];
+            // Знаходимо максимальний існуючий код
+            let maxCode = 0;
             sortedRequests.forEach(req => {
-                req.items.forEach((item, index) => {
-                    if (!item.code) {
-                        itemsWithoutCode.push({ requestId: req.id, itemIndex: index });
+                req.items.forEach(item => {
+                    if (item.code) {
+                        const code = parseInt(item.code);
+                        if (!isNaN(code) && code > maxCode) {
+                            maxCode = code;
+                        }
                     }
                 });
             });
 
-            // Призначаємо коди
-            let nextCode = 1;
-            const updates = itemsWithoutCode.map(({ requestId, itemIndex }) => ({
-                requestId,
-                itemIndex,
-                code: (nextCode++).toString().padStart(5, '0')
-            }));
+            // Збираємо всі товари без кодів з їх позиціями
+            const itemsToUpdate = [];
+            sortedRequests.forEach(req => {
+                req.items.forEach((item, index) => {
+                    if (!item.code) {
+                        itemsToUpdate.push({
+                            requestId: req.id,
+                            itemIndex: index,
+                            item
+                        });
+                    }
+                });
+            });
 
-            // Застосовуємо всі оновлення
-            for (const update of updates) {
-                await handleItemUpdate(update.requestId, update.itemIndex, 'code', update.code);
+            // Призначаємо нові коди
+            for (const item of itemsToUpdate) {
+                maxCode++;
+                const newCode = maxCode.toString().padStart(5, '0');
+                await handleItemUpdate(item.requestId, item.itemIndex, 'code', newCode);
             }
         };
 
+        // Перевіряємо, чи є товари без кодів
         const needsMigration = purchaseRequests.some(req => 
             req.items.some(item => !item.code)
         );
