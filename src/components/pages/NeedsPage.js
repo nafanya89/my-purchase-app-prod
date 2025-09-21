@@ -124,23 +124,37 @@ export const NeedsPage = ({
             return acc;
         }, {});
 
+        // Створюємо мапу для порядку груп
+        const groupOrder = {};
+        let orderIndex = 0;
+        groups.forEach(([baseUrl]) => {
+            groupOrder[baseUrl] = orderIndex++;
+        });
+
         // Сортуємо всі товари
         const sortedItems = [...items].sort((a, b) => {
             const baseA = getBaseUrl(a.link);
             const baseB = getBaseUrl(b.link);
             
-            // Якщо обидва товари з одної групи
-            if (baseA && baseB && baseA === baseB && baseColors[baseA]) {
+            // Якщо обидва товари мають групи
+            if (baseA && baseB && baseColors[baseA] && baseColors[baseB]) {
+                // Якщо товари з різних груп, сортуємо за порядком груп
+                if (baseA !== baseB) {
+                    return groupOrder[baseA] - groupOrder[baseB];
+                }
+                // Якщо з однієї групи, зберігаємо поточний порядок
                 return 0;
             }
-            // Якщо тільки перший товар з групи
+            
+            // Якщо тільки перший товар має групу
             if (baseA && baseColors[baseA]) {
                 return -1;
             }
-            // Якщо тільки другий товар з групи
+            // Якщо тільки другий товар має групу
             if (baseB && baseColors[baseB]) {
                 return 1;
             }
+            // Якщо жоден товар не має групи, зберігаємо поточний порядок
             return 0;
         });
 
