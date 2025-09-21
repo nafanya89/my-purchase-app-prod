@@ -231,7 +231,7 @@ export const NeedsPage = ({
                                                 </td>
                                                 <td className="px-4 py-2">{item.quantity}</td>
                                                 <td className="px-4 py-2" style={{ width: hiddenColumns.pricePerUnit ? '0' : '150px', transition: 'width 500ms ease-in-out', overflow: 'hidden' }}>
-                                                    {!hiddenColumns.pricePerUnit && item.pricePerUnit?.toFixed(2) || '0.00'}
+                                                    {(!hiddenColumns.pricePerUnit && (item.pricePerUnit?.toFixed(2) || '0.00'))}
                                                 </td>
                                                 <td className="px-4 py-2" style={{ width: '150px' }}>{(item.quantity * item.pricePerUnit).toFixed(2)}</td>
                                                 <td className="px-4 py-2" style={{ width: hiddenColumns.comment ? '0' : '200px', transition: 'width 500ms ease-in-out', overflow: 'hidden' }}>
