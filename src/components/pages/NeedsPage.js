@@ -8,6 +8,12 @@ const PURCHASE_STATUSES = {
     RECEIVED: 'отримано'
 };
 
+const PAYMENT_TYPES = {
+    NONE: '',
+    CASH: 'готівка',
+    INVOICE: 'рахунок'
+};
+
 export const NeedsPage = ({ 
     purchaseRequests, 
     handleStatusChange, 
@@ -19,16 +25,31 @@ export const NeedsPage = ({
 }) => {
     const [activeTab, setActiveTab] = useState('нове');
     const statuses = ['нове', 'в прогресі', 'завершено'];
-    const totalSumOfAllRequests = purchaseRequests.reduce((acc, req) => 
-        acc + req.items.reduce((sum, item) => sum + (item.quantity * item.pricePerUnit), 0), 0
-    );
+    const { totalSum, cashSum, invoiceSum } = purchaseRequests.reduce((acc, req) => {
+        req.items.forEach(item => {
+            const itemTotal = item.quantity * item.pricePerUnit;
+            acc.totalSum += itemTotal;
+            if (item.paymentType === PAYMENT_TYPES.CASH) {
+                acc.cashSum += itemTotal;
+            } else if (item.paymentType === PAYMENT_TYPES.INVOICE) {
+                acc.invoiceSum += itemTotal;
+            }
+        });
+        return acc;
+    }, { totalSum: 0, cashSum: 0, invoiceSum: 0 });
 
     return (
         <div>
             <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
                 <h2 className="text-3xl font-bold">Потреби в закупці</h2>
                 <div className="flex items-center gap-4">
-                    <div className="font-bold text-lg">Загальна сума: {totalSumOfAllRequests.toFixed(2)} грн</div>
+                    <div className="flex flex-col gap-1">
+                        <div className="font-bold text-lg">Загальна сума: {totalSum.toFixed(2)} грн</div>
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                            <div>Сума готівка: {cashSum.toFixed(2)} грн</div>
+                            <div>Сума рахунок: {invoiceSum.toFixed(2)} грн</div>
+                        </div>
+                    </div>
                     <button onClick={openAddRequestModal} className="bg-blue-600 text-white font-semibold px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center gap-2">
                         <PlusCircle size={20} /> Створити запит
                     </button>
@@ -84,6 +105,7 @@ export const NeedsPage = ({
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Загальна ціна</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Коментар</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Чек/Рахунок</th>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Тип оплати</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Статус покупки</th>
                                         </tr>
                                     </thead>
@@ -114,6 +136,17 @@ export const NeedsPage = ({
                                                         placeholder="Посилання..." 
                                                         className="w-full p-1 bg-slate-100 dark:bg-slate-600 rounded-md text-sm" 
                                                     />
+                                                </td>
+                                                <td className="px-4 py-2">
+                                                    <select
+                                                        value={item.paymentType || PAYMENT_TYPES.NONE}
+                                                        onChange={(e) => handleItemUpdate(req.id, index, 'paymentType', e.target.value)}
+                                                        className="w-full p-1 bg-slate-100 dark:bg-slate-600 rounded-md text-sm"
+                                                    >
+                                                        <option value={PAYMENT_TYPES.NONE}>-</option>
+                                                        <option value={PAYMENT_TYPES.CASH}>{PAYMENT_TYPES.CASH}</option>
+                                                        <option value={PAYMENT_TYPES.INVOICE}>{PAYMENT_TYPES.INVOICE}</option>
+                                                    </select>
                                                 </td>
                                                 <td className="px-4 py-2">
                                                     <select

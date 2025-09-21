@@ -9,6 +9,12 @@ const PURCHASE_STATUSES = {
     RECEIVED: 'отримано'
 };
 
+const PAYMENT_TYPES = {
+    NONE: '',
+    CASH: 'готівка',
+    INVOICE: 'рахунок'
+};
+
 export const AddRequestModal = ({ 
     isOpen, 
     onClose, 
@@ -85,6 +91,15 @@ export const AddRequestModal = ({
                             rows="2" 
                             className="w-full p-2 bg-white dark:bg-slate-600 rounded-lg"
                         />
+                        <select
+                            value={item.paymentType || PAYMENT_TYPES.NONE}
+                            onChange={(e) => handleNewRequestItemChange(index, 'paymentType', e.target.value)}
+                            className="w-full p-2 bg-white dark:bg-slate-600 rounded-lg"
+                        >
+                            <option value={PAYMENT_TYPES.NONE}>-</option>
+                            <option value={PAYMENT_TYPES.CASH}>{PAYMENT_TYPES.CASH}</option>
+                            <option value={PAYMENT_TYPES.INVOICE}>{PAYMENT_TYPES.INVOICE}</option>
+                        </select>
                         <select
                             value={item.purchaseStatus || PURCHASE_STATUSES.NOT_PURCHASED}
                             onChange={(e) => handleNewRequestItemChange(index, 'purchaseStatus', e.target.value)}
