@@ -75,18 +75,17 @@ export const NeedsPage = ({
         );
 
         // Збираємо всі товари в порядку
-        const allItems = [];
-        sortedRequests.forEach(req => {
-            req.items.forEach((item, idx) => {
-                const key = `${req.id}-${idx}`;
-                allItems.push({ key });
-            });
-        });
-
-        // Генеруємо коди для всіх товарів
+        let counter = 1;
         const newCodes = {};
-        allItems.forEach((item, index) => {
-            newCodes[item.key] = (index + 1).toString().padStart(5, '0');
+
+        // Проходимо по всіх списках в порядку створення
+        sortedRequests.forEach(request => {
+            // Проходимо по всіх товарах в списку
+            request.items.forEach((_, index) => {
+                const key = `${request.id}-${index}`;
+                newCodes[key] = counter.toString().padStart(5, '0');
+                counter++;
+            });
         });
 
         // Оновлюємо локальний стан
