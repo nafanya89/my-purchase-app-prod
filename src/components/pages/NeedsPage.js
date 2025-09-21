@@ -131,8 +131,14 @@ export const NeedsPage = ({
             groupOrder[baseUrl] = orderIndex++;
         });
 
+        // Додаємо оригінальні індекси до товарів перед сортуванням
+        const itemsWithIndices = items.map((item, index) => ({
+            ...item,
+            originalIndex: index
+        }));
+
         // Сортуємо всі товари
-        const sortedItems = [...items].sort((a, b) => {
+        const sortedItems = itemsWithIndices.sort((a, b) => {
             const baseA = getBaseUrl(a.link);
             const baseB = getBaseUrl(b.link);
             
@@ -344,10 +350,10 @@ export const NeedsPage = ({
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                        {getGroupedItems(req.items, req.id).map((item, index) => (
-                                            <tr key={index}>
+                                        {getGroupedItems(req.items, req.id).map((item) => (
+                                            <tr key={item.originalIndex}>
                                                 <td className="px-4 py-2">
-                                                    <button onClick={() => handleToggleItemOrdered(req.id, index, !item.ordered)}>
+                                                    <button onClick={() => handleToggleItemOrdered(req.id, item.originalIndex, !item.ordered)}>
                                                         {item.ordered ? <CheckSquare className="text-green-500" /> : <Square className="text-slate-400" />}
                                                     </button>
                                                 </td>
@@ -381,7 +387,7 @@ export const NeedsPage = ({
                                                         <input 
                                                             type="url" 
                                                             defaultValue={item.receiptLink || ''} 
-                                                            onBlur={(e) => handleItemUpdate(req.id, index, 'receiptLink', e.target.value)} 
+                                                            onBlur={(e) => handleItemUpdate(req.id, item.originalIndex, 'receiptLink', e.target.value)} 
                                                             placeholder="Посилання..." 
                                                             className="w-full p-1 bg-slate-100 dark:bg-slate-600 rounded-md text-sm" 
                                                         />
@@ -391,7 +397,7 @@ export const NeedsPage = ({
                                                     {!hiddenColumns.paymentType && (
                                                         <select
                                                             value={item.paymentType || PAYMENT_TYPES.NONE}
-                                                            onChange={(e) => handleItemUpdate(req.id, index, 'paymentType', e.target.value)}
+                                                            onChange={(e) => handleItemUpdate(req.id, item.originalIndex, 'paymentType', e.target.value)}
                                                             className="w-full p-1 bg-slate-100 dark:bg-slate-600 rounded-md text-sm"
                                                         >
                                                             <option value={PAYMENT_TYPES.NONE}>-</option>
@@ -404,7 +410,7 @@ export const NeedsPage = ({
                                                     {!hiddenColumns.purchaseStatus && (
                                                         <select
                                                             value={item.purchaseStatus || PURCHASE_STATUSES.NOT_PURCHASED}
-                                                            onChange={(e) => handleItemUpdate(req.id, index, 'purchaseStatus', e.target.value)}
+                                                            onChange={(e) => handleItemUpdate(req.id, item.originalIndex, 'purchaseStatus', e.target.value)}
                                                             className="w-full p-1 bg-slate-100 dark:bg-slate-600 rounded-md text-sm"
                                                         >
                                                             {Object.values(PURCHASE_STATUSES).map(status => (
