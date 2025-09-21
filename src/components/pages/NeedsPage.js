@@ -65,10 +65,11 @@ export const NeedsPage = ({
 }) => {
     // Ефект для міграції кодів
     const [isMigrating, setIsMigrating] = useState(false);
+    const [migrationCompleted, setMigrationCompleted] = useState(false);
 
     useEffect(() => {
         const migrateItemCodes = async () => {
-            if (isMigrating) return;
+            if (isMigrating || migrationCompleted) return;
             setIsMigrating(true);
 
             try {
@@ -83,11 +84,12 @@ export const NeedsPage = ({
                 let counter = 1;
                 let totalUpdated = 0;
 
-                // Проходимо по всіх списках в порядку створення
+                // Збираємо всі оновлення
+                const updates = [];
                 for (const request of sortedRequests) {
                     console.log(`Processing request ${request.id}...`);
-                    let hasChanges = false;
                     const updatedItems = [...request.items];
+                    let hasChanges = false;
 
                     // Проходимо по всіх товарах в списку
                     for (let i = 0; i < updatedItems.length; i++) {
@@ -103,40 +105,46 @@ export const NeedsPage = ({
                         counter++;
                     }
 
-                    // Оновлюємо список в Firebase, якщо були зміни
                     if (hasChanges) {
-                        try {
-                            console.log(`Saving changes for request ${request.id}...`);
-                            await handleItemUpdate(request.id, null, 'items', updatedItems);
-                            totalUpdated++;
-                            console.log(`Changes saved for request ${request.id}`);
-                            // Чекаємо трохи між оновленнями
-                            await new Promise(resolve => setTimeout(resolve, 500));
-                        } catch (error) {
-                            console.error('Error updating request:', error);
-                            console.error(error);
-                        }
-                    } else {
-                        console.log(`No changes needed for request ${request.id}`);
+                        updates.push({
+                            requestId: request.id,
+                            items: updatedItems
+                        });
+                    }
+                }
+
+                // Застосовуємо всі оновлення
+                for (const update of updates) {
+                    try {
+                        console.log(`Saving changes for request ${update.requestId}...`);
+                        await handleItemUpdate(update.requestId, null, 'items', update.items);
+                        totalUpdated++;
+                        console.log(`Changes saved for request ${update.requestId}`);
+                        // Чекаємо трохи між оновленнями
+                        await new Promise(resolve => setTimeout(resolve, 500));
+                    } catch (error) {
+                        console.error('Error updating request:', error);
+                        console.error(error);
                     }
                 }
 
                 console.log('Migration completed!');
                 console.log('Total requests updated:', totalUpdated);
+                setMigrationCompleted(true);
             } finally {
                 setIsMigrating(false);
             }
         };
 
         // Перевіряємо, чи потрібна міграція
-        const needsMigration = purchaseRequests.some(req => 
+        const needsMigration = !migrationCompleted && purchaseRequests.some(req => 
             req.items.some(item => !item.code)
         );
 
         if (needsMigration && !isMigrating) {
             migrateItemCodes();
         }
-    }, [purchaseRequests, isMigrating, handleItemUpdate]);
+    }, [purchaseRequests, isMigrating, migrationCompleted, handleItemUpdate]);
     const [activeTab, setActiveTab] = useState('нове');
     const [groupedRequests, setGroupedRequests] = useState({});
     const [hiddenColumns, setHiddenColumns] = useState({
