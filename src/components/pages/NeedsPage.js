@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { PlusCircle, Copy, CheckSquare, Square, Trash2, ChevronLeft, ChevronRight, MessageCircle, Group } from 'lucide-react';
+import { doc, updateDoc } from 'firebase/firestore';
+import { db } from '../../config/firebase';
 
 const SITE_COLORS = [
     'text-purple-700 dark:text-purple-400',
@@ -106,39 +108,44 @@ export const NeedsPage = ({
                     a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
                 );
 
-                // Збираємо всі товари (з кодами і без) в порядку створення
-                const allItems = [];
-                sortedRequests.forEach(req => {
-                    req.items.forEach((item, index) => {
-                        allItems.push({
-                            requestId: req.id,
-                            itemIndex: index,
-                            item
-                        });
-                    });
-                });
+                // Створюємо копію списків для оновлення
+                const updatedRequests = sortedRequests.map(req => ({
+                    ...req,
+                    items: [...req.items]
+                }));
 
-                // Призначаємо коди всім товарам
-                const updates = [];
-                for (let i = 0; i < allItems.length; i++) {
-                    const item = allItems[i];
-                    const newCode = (i + 1).toString().padStart(5, '0');
+                // Збираємо всі товари для нумерації
+                let codeCounter = 1;
+                
+                // Оновлюємо коди в кожному списку
+                for (const request of updatedRequests) {
+                    let hasChanges = false;
                     
-                    // Оновлюємо тільки якщо код змінився або його немає
-                    if (!item.item.code || item.item.code !== newCode) {
-                        updates.push({
-                            requestId: item.requestId,
-                            itemIndex: item.itemIndex,
-                            code: newCode
-                        });
+                    for (let i = 0; i < request.items.length; i++) {
+                        const newCode = codeCounter.toString().padStart(5, '0');
+                        if (request.items[i].code !== newCode) {
+                            request.items[i] = {
+                                ...request.items[i],
+                                code: newCode
+                            };
+                            hasChanges = true;
+                        }
+                        codeCounter++;
                     }
-                }
 
-                // Застосовуємо оновлення послідовно
-                for (const update of updates) {
-                    await handleItemUpdate(update.requestId, update.itemIndex, 'code', update.code);
-                    // Чекаємо трохи між оновленнями
-                    await new Promise(resolve => setTimeout(resolve, 100));
+                    // Оновлюємо весь список якщо були зміни
+                    if (hasChanges) {
+                        try {
+                            const requestRef = doc(db, 'purchaseRequests', request.id);
+                            await updateDoc(requestRef, {
+                                items: request.items
+                            });
+                            // Чекаємо трохи між оновленнями
+                            await new Promise(resolve => setTimeout(resolve, 500));
+                        } catch (error) {
+                            console.error('Error updating request:', error);
+                        }
+                    }
                 }
             } finally {
                 setIsMigrating(false);
@@ -152,7 +159,7 @@ export const NeedsPage = ({
         if (needsMigration && !isMigrating) {
             migrateItemCodes();
         }
-    }, [purchaseRequests, handleItemUpdate, isMigrating]);
+    }, [purchaseRequests, isMigrating]);
     const [activeTab, setActiveTab] = useState('нове');
     const [groupedRequests, setGroupedRequests] = useState({});
     const [hiddenColumns, setHiddenColumns] = useState({
