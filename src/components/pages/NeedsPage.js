@@ -141,36 +141,46 @@ export const NeedsPage = ({
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Замовлено</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Назва</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">К-сть</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase flex items-center gap-1">
-                                                Ціна за од.
-                                                <button onClick={() => toggleColumn('pricePerUnit')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
-                                                    {hiddenColumns.pricePerUnit ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-                                                </button>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                                <div className="flex items-center gap-1">
+                                                    Ціна за од.
+                                                    <button onClick={() => toggleColumn('pricePerUnit')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
+                                                        {hiddenColumns.pricePerUnit ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                                                    </button>
+                                                </div>
                                             </th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Загальна ціна</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase flex items-center gap-1">
-                                                Коментар
-                                                <button onClick={() => toggleColumn('comment')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
-                                                    {hiddenColumns.comment ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-                                                </button>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                                <div className="flex items-center gap-1">
+                                                    Коментар
+                                                    <button onClick={() => toggleColumn('comment')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
+                                                        {hiddenColumns.comment ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                                                    </button>
+                                                </div>
                                             </th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase flex items-center gap-1">
-                                                Чек/Рахунок
-                                                <button onClick={() => toggleColumn('receipt')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
-                                                    {hiddenColumns.receipt ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-                                                </button>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                                <div className="flex items-center gap-1">
+                                                    Чек/Рахунок
+                                                    <button onClick={() => toggleColumn('receipt')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
+                                                        {hiddenColumns.receipt ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                                                    </button>
+                                                </div>
                                             </th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase flex items-center gap-1">
-                                                Тип оплати
-                                                <button onClick={() => toggleColumn('paymentType')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
-                                                    {hiddenColumns.paymentType ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-                                                </button>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                                <div className="flex items-center gap-1">
+                                                    Тип оплати
+                                                    <button onClick={() => toggleColumn('paymentType')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
+                                                        {hiddenColumns.paymentType ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                                                    </button>
+                                                </div>
                                             </th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase flex items-center gap-1">
-                                                Статус покупки
-                                                <button onClick={() => toggleColumn('purchaseStatus')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
-                                                    {hiddenColumns.purchaseStatus ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
-                                                </button>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">
+                                                <div className="flex items-center gap-1">
+                                                    Статус покупки
+                                                    <button onClick={() => toggleColumn('purchaseStatus')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
+                                                        {hiddenColumns.purchaseStatus ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                                                    </button>
+                                                </div>
                                             </th>
                                         </tr>
                                     </thead>
