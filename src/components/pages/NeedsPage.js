@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { PlusCircle, Copy, CheckSquare, Square, Trash2 } from 'lucide-react';
+import { PlusCircle, Copy, CheckSquare, Square, Trash2, ChevronDown, ChevronUp, MessageCircle } from 'lucide-react';
 
 const PURCHASE_STATUSES = {
     NOT_PURCHASED: 'не куплено',
@@ -24,7 +24,29 @@ export const NeedsPage = ({
     handleItemUpdate 
 }) => {
     const [activeTab, setActiveTab] = useState('нове');
+    const [hiddenColumns, setHiddenColumns] = useState({
+        pricePerUnit: false,
+        comment: false,
+        receipt: false,
+        paymentType: false,
+        purchaseStatus: false
+    });
+    const [expandedComments, setExpandedComments] = useState({});
     const statuses = ['нове', 'в прогресі', 'завершено'];
+
+    const toggleColumn = (columnName) => {
+        setHiddenColumns(prev => ({
+            ...prev,
+            [columnName]: !prev[columnName]
+        }));
+    };
+
+    const toggleComment = (requestId) => {
+        setExpandedComments(prev => ({
+            ...prev,
+            [requestId]: !prev[requestId]
+        }));
+    };
     const { totalSum, cashSum, invoiceSum } = purchaseRequests.reduce((acc, req) => {
         req.items.forEach(item => {
             const itemTotal = item.quantity * item.pricePerUnit;
@@ -87,6 +109,24 @@ export const NeedsPage = ({
                                         від: <span className="font-medium">{req.requesterName}</span>, {req.createdAt.toDate().toLocaleString()}
                                     </p>
                                     <p className="font-bold text-md mt-2">Сума: {requestTotal.toFixed(2)} грн</p>
+                                    <div className="flex items-center gap-2 mt-2">
+                                        <button 
+                                            onClick={() => toggleComment(req.id)} 
+                                            className="text-gray-500 hover:text-gray-700 flex items-center gap-1 text-sm"
+                                        >
+                                            <MessageCircle size={16} />
+                                            {expandedComments[req.id] ? 'Згорнути коментар' : 'Розгорнути коментар'}
+                                        </button>
+                                    </div>
+                                    {expandedComments[req.id] && (
+                                        <textarea
+                                            value={req.comment || ''}
+                                            onChange={(e) => handleItemUpdate(req.id, 'comment', e.target.value)}
+                                            placeholder="Додати коментар до запиту..."
+                                            className="w-full mt-2 p-2 bg-slate-100 dark:bg-slate-700 rounded-lg"
+                                            rows="2"
+                                        />
+                                    )}
                                 </div>
                                 <div className="flex gap-2">
                                     <button onClick={() => handleDeleteRequest(req.id)} className="text-red-500 hover:text-red-700 p-1 rounded-full">
@@ -101,12 +141,37 @@ export const NeedsPage = ({
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Замовлено</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Назва</th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">К-сть</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Ціна за од.</th>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase flex items-center gap-1">
+                                                Ціна за од.
+                                                <button onClick={() => toggleColumn('pricePerUnit')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
+                                                    {hiddenColumns.pricePerUnit ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                                                </button>
+                                            </th>
                                             <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Загальна ціна</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Коментар</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Чек/Рахунок</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Тип оплати</th>
-                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Статус покупки</th>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase flex items-center gap-1">
+                                                Коментар
+                                                <button onClick={() => toggleColumn('comment')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
+                                                    {hiddenColumns.comment ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                                                </button>
+                                            </th>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase flex items-center gap-1">
+                                                Чек/Рахунок
+                                                <button onClick={() => toggleColumn('receipt')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
+                                                    {hiddenColumns.receipt ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                                                </button>
+                                            </th>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase flex items-center gap-1">
+                                                Тип оплати
+                                                <button onClick={() => toggleColumn('paymentType')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
+                                                    {hiddenColumns.paymentType ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                                                </button>
+                                            </th>
+                                            <th className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase flex items-center gap-1">
+                                                Статус покупки
+                                                <button onClick={() => toggleColumn('purchaseStatus')} className="hover:bg-gray-200 dark:hover:bg-slate-600 rounded p-1">
+                                                    {hiddenColumns.purchaseStatus ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                                                </button>
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody className="bg-white dark:bg-slate-800 divide-y divide-gray-200 dark:divide-gray-700">
@@ -125,40 +190,46 @@ export const NeedsPage = ({
                                                     ) : (item.name)}
                                                 </td>
                                                 <td className="px-4 py-2">{item.quantity}</td>
-                                                <td className="px-4 py-2">{item.pricePerUnit?.toFixed(2) || '0.00'}</td>
+                                                {!hiddenColumns.pricePerUnit && <td className="px-4 py-2">{item.pricePerUnit?.toFixed(2) || '0.00'}</td>}
                                                 <td className="px-4 py-2">{(item.quantity * item.pricePerUnit).toFixed(2)}</td>
-                                                <td className="px-4 py-2">{item.comment}</td>
-                                                <td className="px-4 py-2">
-                                                    <input 
-                                                        type="url" 
-                                                        defaultValue={item.receiptLink || ''} 
-                                                        onBlur={(e) => handleItemUpdate(req.id, index, 'receiptLink', e.target.value)} 
-                                                        placeholder="Посилання..." 
-                                                        className="w-full p-1 bg-slate-100 dark:bg-slate-600 rounded-md text-sm" 
-                                                    />
-                                                </td>
-                                                <td className="px-4 py-2">
-                                                    <select
-                                                        value={item.paymentType || PAYMENT_TYPES.NONE}
-                                                        onChange={(e) => handleItemUpdate(req.id, index, 'paymentType', e.target.value)}
-                                                        className="w-full p-1 bg-slate-100 dark:bg-slate-600 rounded-md text-sm"
-                                                    >
-                                                        <option value={PAYMENT_TYPES.NONE}>-</option>
-                                                        <option value={PAYMENT_TYPES.CASH}>{PAYMENT_TYPES.CASH}</option>
-                                                        <option value={PAYMENT_TYPES.INVOICE}>{PAYMENT_TYPES.INVOICE}</option>
-                                                    </select>
-                                                </td>
-                                                <td className="px-4 py-2">
-                                                    <select
-                                                        value={item.purchaseStatus || PURCHASE_STATUSES.NOT_PURCHASED}
-                                                        onChange={(e) => handleItemUpdate(req.id, index, 'purchaseStatus', e.target.value)}
-                                                        className="w-full p-1 bg-slate-100 dark:bg-slate-600 rounded-md text-sm"
-                                                    >
-                                                        {Object.values(PURCHASE_STATUSES).map(status => (
-                                                            <option key={status} value={status}>{status}</option>
-                                                        ))}
-                                                    </select>
-                                                </td>
+                                                {!hiddenColumns.comment && <td className="px-4 py-2">{item.comment}</td>}
+                                                {!hiddenColumns.receipt && (
+                                                    <td className="px-4 py-2">
+                                                        <input 
+                                                            type="url" 
+                                                            defaultValue={item.receiptLink || ''} 
+                                                            onBlur={(e) => handleItemUpdate(req.id, index, 'receiptLink', e.target.value)} 
+                                                            placeholder="Посилання..." 
+                                                            className="w-full p-1 bg-slate-100 dark:bg-slate-600 rounded-md text-sm" 
+                                                        />
+                                                    </td>
+                                                )}
+                                                {!hiddenColumns.paymentType && (
+                                                    <td className="px-4 py-2">
+                                                        <select
+                                                            value={item.paymentType || PAYMENT_TYPES.NONE}
+                                                            onChange={(e) => handleItemUpdate(req.id, index, 'paymentType', e.target.value)}
+                                                            className="w-full p-1 bg-slate-100 dark:bg-slate-600 rounded-md text-sm"
+                                                        >
+                                                            <option value={PAYMENT_TYPES.NONE}>-</option>
+                                                            <option value={PAYMENT_TYPES.CASH}>{PAYMENT_TYPES.CASH}</option>
+                                                            <option value={PAYMENT_TYPES.INVOICE}>{PAYMENT_TYPES.INVOICE}</option>
+                                                        </select>
+                                                    </td>
+                                                )}
+                                                {!hiddenColumns.purchaseStatus && (
+                                                    <td className="px-4 py-2">
+                                                        <select
+                                                            value={item.purchaseStatus || PURCHASE_STATUSES.NOT_PURCHASED}
+                                                            onChange={(e) => handleItemUpdate(req.id, index, 'purchaseStatus', e.target.value)}
+                                                            className="w-full p-1 bg-slate-100 dark:bg-slate-600 rounded-md text-sm"
+                                                        >
+                                                            {Object.values(PURCHASE_STATUSES).map(status => (
+                                                                <option key={status} value={status}>{status}</option>
+                                                            ))}
+                                                        </select>
+                                                    </td>
+                                                )}
                                             </tr>
                                         ))}
                                     </tbody>
