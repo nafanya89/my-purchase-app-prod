@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, where } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { firebaseConfig } from '../config/firebase';
 
 export const useData = (db, user) => {
@@ -19,7 +19,7 @@ export const useData = (db, user) => {
         const projectId = firebaseConfig.projectId;
 
         const unsubItems = onSnapshot(
-            query(collection(db, `/artifacts/${projectId}/users/${uid}/items`)), 
+            collection(db, `/artifacts/${projectId}/users/${uid}/items`), 
             (snap) => {
                 const data = snap.docs
                     .map(doc => ({ id: doc.id, ...doc.data() }))
@@ -29,7 +29,7 @@ export const useData = (db, user) => {
         );
 
         const unsubLists = onSnapshot(
-            query(collection(db, `/artifacts/${projectId}/users/${uid}/shoppingLists`)), 
+            collection(db, `/artifacts/${projectId}/users/${uid}/shoppingLists`), 
             (snap) => {
                 const data = snap.docs
                     .map(doc => ({ id: doc.id, ...doc.data() }))
