@@ -104,16 +104,14 @@ export const NeedsPage = ({
             for (const request of sortedRequests) {
                 const updatedItems = request.items.map((item, index) => {
                     const code = itemCodes[`${request.id}-${index}`];
-                    return code && item.code !== code ? { ...item, code } : item;
+                    return code ? { ...item, code } : item;
                 });
 
-                if (updatedItems.some((item, i) => item.code !== request.items[i].code)) {
-                    try {
-                        await handleItemUpdate(request.id, null, 'items', updatedItems);
-                        await new Promise(resolve => setTimeout(resolve, 500));
-                    } catch (error) {
-                        console.error('Error updating request:', error);
-                    }
+                try {
+                    await handleItemUpdate(request.id, null, 'items', updatedItems, purchaseRequests);
+                    await new Promise(resolve => setTimeout(resolve, 500));
+                } catch (error) {
+                    console.error('Error updating request:', error);
                 }
             }
         };
