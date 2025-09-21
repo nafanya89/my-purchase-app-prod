@@ -1,7 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { PlusCircle, Copy, CheckSquare, Square, Trash2, ChevronLeft, ChevronRight, MessageCircle, Group } from 'lucide-react';
-import { doc, updateDoc } from 'firebase/firestore';
-import { db, firebaseConfig } from '../../config/firebase';
 
 const SITE_COLORS = [
     'text-purple-700 dark:text-purple-400',
@@ -109,8 +107,7 @@ export const NeedsPage = ({
                     if (hasChanges) {
                         try {
                             console.log(`Saving changes for request ${request.id}...`);
-                            const requestRef = doc(db, `/artifacts/${firebaseConfig.projectId}/public/data/purchaseRequests`, request.id);
-                            await updateDoc(requestRef, { items: updatedItems });
+                            await handleItemUpdate(request.id, null, 'items', updatedItems);
                             totalUpdated++;
                             console.log(`Changes saved for request ${request.id}`);
                             // Чекаємо трохи між оновленнями
@@ -139,7 +136,7 @@ export const NeedsPage = ({
         if (needsMigration && !isMigrating) {
             migrateItemCodes();
         }
-    }, [purchaseRequests, isMigrating]);
+    }, [purchaseRequests, isMigrating, handleItemUpdate]);
     const [activeTab, setActiveTab] = useState('нове');
     const [groupedRequests, setGroupedRequests] = useState({});
     const [hiddenColumns, setHiddenColumns] = useState({
