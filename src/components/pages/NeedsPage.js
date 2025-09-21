@@ -38,6 +38,12 @@ const getBaseUrl = (url) => {
 };
 
 const generateItemCode = (allRequests, currentRequestId, itemIndex) => {
+    // Якщо у товару вже є код, повертаємо його
+    const currentRequest = allRequests.find(req => req.id === currentRequestId);
+    if (currentRequest?.items[itemIndex]?.code) {
+        return currentRequest.items[itemIndex].code;
+    }
+
     let maxCode = 0;
 
     // Шукаємо максимальний код серед всіх товарів у всіх списках
@@ -52,7 +58,7 @@ const generateItemCode = (allRequests, currentRequestId, itemIndex) => {
         });
     });
 
-    // Якщо це новий товар (без коду), генеруємо наступний код
+    // Генеруємо наступний код
     const nextCode = maxCode + 1;
     
     // Форматуємо код до 5 цифр з ведучими нулями
@@ -81,6 +87,46 @@ export const NeedsPage = ({
     handleToggleItemOrdered, 
     handleItemUpdate 
 }) => {
+    // Ефект для міграції кодів
+    React.useEffect(() => {
+        const migrateItemCodes = async () => {
+            // Проходимо по всіх списках в порядку створення
+            const sortedRequests = [...purchaseRequests].sort((a, b) => 
+                a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
+            );
+
+            // Збираємо всі товари без кодів
+            const itemsWithoutCode = [];
+            sortedRequests.forEach(req => {
+                req.items.forEach((item, index) => {
+                    if (!item.code) {
+                        itemsWithoutCode.push({ requestId: req.id, itemIndex: index });
+                    }
+                });
+            });
+
+            // Призначаємо коди
+            let nextCode = 1;
+            const updates = itemsWithoutCode.map(({ requestId, itemIndex }) => ({
+                requestId,
+                itemIndex,
+                code: (nextCode++).toString().padStart(5, '0')
+            }));
+
+            // Застосовуємо всі оновлення
+            for (const update of updates) {
+                await handleItemUpdate(update.requestId, update.itemIndex, 'code', update.code);
+            }
+        };
+
+        const needsMigration = purchaseRequests.some(req => 
+            req.items.some(item => !item.code)
+        );
+
+        if (needsMigration) {
+            migrateItemCodes();
+        }
+    }, [purchaseRequests, handleItemUpdate]);
     const [activeTab, setActiveTab] = useState('нове');
     const [groupedRequests, setGroupedRequests] = useState({});
     const [hiddenColumns, setHiddenColumns] = useState({
