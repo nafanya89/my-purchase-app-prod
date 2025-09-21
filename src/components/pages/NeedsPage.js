@@ -37,8 +37,8 @@ const getBaseUrl = (url) => {
     return baseDomain || null;
 };
 
-const getItemCode = (item) => {
-    return item.code || '00000';
+const getItemCode = (requestId, itemIndex, itemCodes) => {
+    return itemCodes[`${requestId}-${itemIndex}`] || '00000';
 };
 
 const PURCHASE_STATUSES = {
@@ -63,88 +63,63 @@ export const NeedsPage = ({
     handleToggleItemOrdered, 
     handleItemUpdate 
 }) => {
-    // Ефект для міграції кодів
-    const [isMigrating, setIsMigrating] = useState(false);
-    const [migrationCompleted, setMigrationCompleted] = useState(false);
+    // Стан для кодів товарів
+    const [itemCodes, setItemCodes] = useState({});
+    const [codesGenerated, setCodesGenerated] = useState(false);
 
+    // Генеруємо коди для всіх товарів
     useEffect(() => {
-        const migrateItemCodes = async () => {
-            if (isMigrating || migrationCompleted) return;
-            setIsMigrating(true);
+        if (codesGenerated || purchaseRequests.length === 0) return;
 
-            try {
-                console.log('Starting migration...');
-                console.log('Total requests:', purchaseRequests.length);
+        // Сортуємо списки за часом створення
+        const sortedRequests = [...purchaseRequests].sort((a, b) => 
+            a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
+        );
 
-                // Сортуємо списки за часом створення
-                const sortedRequests = [...purchaseRequests].sort((a, b) => 
-                    a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
-                );
+        let counter = 1;
+        const newCodes = {};
 
-                let counter = 1;
-                let totalUpdated = 0;
+        // Генеруємо коди для всіх товарів
+        sortedRequests.forEach(request => {
+            request.items.forEach((_, index) => {
+                const key = `${request.id}-${index}`;
+                newCodes[key] = counter.toString().padStart(5, '0');
+                counter++;
+            });
+        });
 
-                // Збираємо всі оновлення
-                const updates = [];
-                for (const request of sortedRequests) {
-                    console.log(`Processing request ${request.id}...`);
-                    const updatedItems = [...request.items];
-                    let hasChanges = false;
+        setItemCodes(newCodes);
+        setCodesGenerated(true);
+    }, [purchaseRequests, codesGenerated]);
 
-                    // Проходимо по всіх товарах в списку
-                    for (let i = 0; i < updatedItems.length; i++) {
-                        const newCode = counter.toString().padStart(5, '0');
-                        if (updatedItems[i].code !== newCode) {
-                            console.log(`Updating item ${i} code from ${updatedItems[i].code} to ${newCode}`);
-                            updatedItems[i] = {
-                                ...updatedItems[i],
-                                code: newCode
-                            };
-                            hasChanges = true;
-                        }
-                        counter++;
-                    }
+    // Оновлюємо коди в Firebase
+    useEffect(() => {
+        const updateCodes = async () => {
+            if (!codesGenerated || Object.keys(itemCodes).length === 0) return;
 
-                    if (hasChanges) {
-                        updates.push({
-                            requestId: request.id,
-                            items: updatedItems
-                        });
-                    }
-                }
+            const sortedRequests = [...purchaseRequests].sort((a, b) => 
+                a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime()
+            );
 
-                // Застосовуємо всі оновлення
-                for (const update of updates) {
+            for (const request of sortedRequests) {
+                const updatedItems = request.items.map((item, index) => {
+                    const code = itemCodes[`${request.id}-${index}`];
+                    return code && item.code !== code ? { ...item, code } : item;
+                });
+
+                if (updatedItems.some((item, i) => item.code !== request.items[i].code)) {
                     try {
-                        console.log(`Saving changes for request ${update.requestId}...`);
-                        await handleItemUpdate(update.requestId, null, 'items', update.items);
-                        totalUpdated++;
-                        console.log(`Changes saved for request ${update.requestId}`);
-                        // Чекаємо трохи між оновленнями
+                        await handleItemUpdate(request.id, null, 'items', updatedItems);
                         await new Promise(resolve => setTimeout(resolve, 500));
                     } catch (error) {
                         console.error('Error updating request:', error);
-                        console.error(error);
                     }
                 }
-
-                console.log('Migration completed!');
-                console.log('Total requests updated:', totalUpdated);
-                setMigrationCompleted(true);
-            } finally {
-                setIsMigrating(false);
             }
         };
 
-        // Перевіряємо, чи потрібна міграція
-        const needsMigration = !migrationCompleted && purchaseRequests.some(req => 
-            req.items.some(item => !item.code)
-        );
-
-        if (needsMigration && !isMigrating) {
-            migrateItemCodes();
-        }
-    }, [purchaseRequests, isMigrating, migrationCompleted, handleItemUpdate]);
+        updateCodes();
+    }, [purchaseRequests, itemCodes, codesGenerated, handleItemUpdate]);
     const [activeTab, setActiveTab] = useState('нове');
     const [groupedRequests, setGroupedRequests] = useState({});
     const [hiddenColumns, setHiddenColumns] = useState({
@@ -459,7 +434,7 @@ export const NeedsPage = ({
                                                     </button>
                                                 </td>
                                                 <td className="px-4 py-2 font-mono" style={{ width: hiddenColumns.code ? '0' : '100px', transition: 'width 500ms ease-in-out', overflow: 'hidden' }}>
-                                                    {!hiddenColumns.code && getItemCode(item)}
+                                                    {!hiddenColumns.code && getItemCode(req.id, item.originalIndex, itemCodes)}
                                                 </td>
                                                 <td className="px-4 py-2 font-medium">
                                                     {item.link ? (
